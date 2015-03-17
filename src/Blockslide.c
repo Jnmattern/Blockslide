@@ -290,12 +290,12 @@ void handle_tick(struct tm *now, TimeUnits units_changed) {
   int Y = 0;
 
   //
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_tick: start");
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_tick: start");
   //
 
   if (splashEnded && !animation_is_scheduled(anim)) {
     //
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_tick: setting digits");
+    //APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_tick: setting digits");
     //
 
     h = now->tm_hour;
@@ -361,14 +361,14 @@ void handle_tick(struct tm *now, TimeUnits units_changed) {
     }
 
     //
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_tick: rescheduling anim");
+    //APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_tick: rescheduling anim");
     //
     createAnim();
     animation_schedule(anim);
   }
 
   //
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_tick: end");
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_tick: end");
   //
 
 }

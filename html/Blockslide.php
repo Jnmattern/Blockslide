@@ -15,7 +15,7 @@
 <div data-role="page" id="page1">
     <div data-theme="a" data-role="header" data-position="fixed">
         <h3>
-            BlockSlide-Date Configuration
+            BlockSlide Configuration
         </h3>
         <div class="ui-grid-a">
             <div class="ui-block-a">
@@ -248,7 +248,16 @@
 </div>
 
 
-    <script>
+  <script>
+<?php
+  if (!isset($_GET['return_to'])) {
+    echo 'var closeURL = "pebblejs://close#";';
+  } else {
+    echo 'var closeURL = "' . $_GET['return_to'] . '";';
+  }
+?>
+
+
       function saveOptions() {
         var options = {
           'dateorder': parseInt($("input[name=dateorder]:checked").val(), 10),
@@ -267,13 +276,13 @@
       $().ready(function() {
         $("#cancel").click(function() {
           console.log("Cancel");
-          document.location = "pebblejs://close#";
+          document.location = closeURL;
         });
 
         $("#save").click(function() {
           console.log("Submit");
           
-          var location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(saveOptions()));
+          var location = closeURL + encodeURIComponent(JSON.stringify(saveOptions()));
           console.log("Close: " + location);
           console.log(location);
           document.location = location;
