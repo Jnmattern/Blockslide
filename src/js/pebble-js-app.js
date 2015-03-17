@@ -70,9 +70,9 @@ Pebble.addEventListener("showConfiguration", function(e) {
 Pebble.addEventListener("webviewclosed", function(e) {
 	console.log("Configuration window closed");
   console.log(e.type);
-  console.log("Response: " + decodeURI(e.response));
+  console.log("Response: " + decodeURIComponent(e.response));
 
-	var configuration = JSON.parse(decodeURI(e.response));
+	var configuration = JSON.parse(decodeURIComponent(e.response));
 	Pebble.sendAppMessage(configuration);
 	
 	dateorder = configuration["dateorder"];
