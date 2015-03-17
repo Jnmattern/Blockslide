@@ -621,12 +621,13 @@ void in_received_handler(DictionaryIterator *received, void *context) {
 
   if (dateorder && weekday && battery && bluetooth && lang && stripes && corners && digits && colorThemeTuple) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config:");
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "dateorder=%d, weekday=%d, battery=%d, BT=%d, lang=%d, stripes=%d, corners=%d, digits=%d, colorTheme=%d",
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, lang=%d",
             (int)dateorder->value->int32, (int)weekday->value->int32,
             (int)battery->value->int32, (int)bluetooth->value->int32,
-            (int)lang->value->int32, (int)stripes->value->int32,
-            (int)corners->value->int32, (int)digits->value->int32,
-            (int)colorThemeTuple->value->int32);
+            (int)lang->value->int32);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
+            (int)stripes->value->int32, (int)corners->value->int32,
+            (int)digits->value->int32, (int)colorThemeTuple->value->int32);
 
     somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
     somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
