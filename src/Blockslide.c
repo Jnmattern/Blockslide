@@ -632,7 +632,6 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
     somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
     somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
-    somethingChanged |= checkAndSaveInt(&colorTheme, colorThemeTuple->value->int32, CONFIG_KEY_COLORTHEME);
 
     checkAndSaveInt(&batteryStatus, battery->value->int32, CONFIG_KEY_BATTERY);
     checkAndSaveInt(&bluetoothStatus, bluetooth->value->int32, CONFIG_KEY_BLUETOOTH);
@@ -643,6 +642,7 @@ void in_received_handler(DictionaryIterator *received, void *context) {
 
     digitShapesHaveToBeSwapped = checkAndSaveInt(&fullDigits, digits->value->int32, CONFIG_KEY_FULLDIGITS);
     digitShapesChanged |= digitShapesHaveToBeSwapped;
+    digitShapesChanged |= checkAndSaveInt(&colorTheme, colorThemeTuple->value->int32, CONFIG_KEY_COLORTHEME);
 
 
     if (digitShapesHaveToBeSwapped) {
