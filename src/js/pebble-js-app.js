@@ -43,6 +43,11 @@ if (!colortheme) {
   colortheme = 0;
 }
 
+var bgcolor = localStorage.getItem("bgcolor");
+if (!bgcolor) {
+  bgcolor = "#000";
+}
+
 function logVariables(msg) {
   console.log(msg);
   console.log("	dateorder: " + dateorder);
@@ -54,17 +59,18 @@ function logVariables(msg) {
   console.log("	roundcorners: " + roundcorners);
   console.log("	fulldigits: " + fulldigits);
   console.log("	colortheme: " + colortheme);
+  console.log("	bgcolor: " + bgcolor);
 
 };
 
 Pebble.addEventListener("ready", function() {
   logVariables("Ready Event");
-	Pebble.sendAppMessage(JSON.parse('{"dateorder":'+dateorder+',"weekday":'+weekday+',"battery":'+battery+',"bluetooth":'+bluetooth+',"lang":'+lang+',"stripes":'+stripes+',"roundcorners":'+roundcorners+',"fulldigits":'+fulldigits+',"colortheme":'+colortheme+'}'));
+	Pebble.sendAppMessage(JSON.parse('{"dateorder":'+dateorder+',"weekday":'+weekday+',"battery":'+battery+',"bluetooth":'+bluetooth+',"lang":'+lang+',"stripes":'+stripes+',"roundcorners":'+roundcorners+',"fulldigits":'+fulldigits+',"colortheme":'+colortheme+',"bgcolor":'+bgcolor+'}'));
 });
 
 Pebble.addEventListener("showConfiguration", function(e) {
 	logVariables("showConfiguration Event");
-	Pebble.openURL("http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide.php?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme);
+	Pebble.openURL("http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide.php?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&bgcolor=" + bgcolor);
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {
@@ -101,4 +107,8 @@ Pebble.addEventListener("webviewclosed", function(e) {
 
   colortheme = configuration["colortheme"];
 	localStorage.setItem("colortheme", colortheme);
+
+  bgcolor = configuration["bgcolor"];
+	localStorage.setItem("bgcolor", bgcolor);
+
 });

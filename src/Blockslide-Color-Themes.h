@@ -1,4 +1,5 @@
 #ifdef PBL_COLOR
+
 enum {
   COLOR_THEME_WHITE = 0,
   COLOR_THEME_SUNSET,

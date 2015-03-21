@@ -4,9 +4,13 @@
                 <title>BlockSlide-Date</title>
                 <meta charset='utf-8'>
                 <meta name='viewport' content='width=device-width, initial-scale=1'>
-                <link rel='stylesheet' href='http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css' />
-                <script src='http://code.jquery.com/jquery-1.9.1.min.js'></script>
-                <script src='http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js'></script>
+                <link rel='stylesheet' href='../jquery.mobile-1.3.2.min.css' />
+                <script src='../jquery-1.9.1.min.js'></script>
+                <script src='../jquery.mobile-1.3.2.min.js'></script>
+
+                <link rel="stylesheet" type="text/css" href="spectrum.css">
+                <script type='text/javascript' src="spectrum.js"></script>
+
                 <style>
                         .ui-header .ui-title { margin-left: 1em; margin-right: 1em; text-overflow: clip; }
                 </style>
@@ -243,6 +247,12 @@
         </fieldset>
       </div>
 
+      <div id="bgcolorpickerdiv" data-role="fieldcontain">
+        <fieldset data-role="controlgroup">
+          <legend>Background Color (Color Pebble only)</legend>
+          <input type='color' id="bgcolorpicker" name="bgcolorpicker" data-theme=""/>
+        </fieldset>
+      </div>
 
 
 </div>
@@ -268,12 +278,37 @@
           'stripes': parseInt($("input[name=stripes]:checked").val(), 10),
           'roundcorners': parseInt($("input[name=roundcorners]:checked").val(), 10),
           'fulldigits': parseInt($("input[name=fulldigits]:checked").val(), 10),
-          'colortheme': parseInt($("input[name=colortheme]:checked").val(), 10)
+          'colortheme': parseInt($("input[name=colortheme]:checked").val(), 10),
+          'color': $("#bgcolorpicker").val()
         }
         return options;
       }
 
       $().ready(function() {
+
+        $("#bgcolorpicker").spectrum({
+<?php
+  if (!isset($_GET['bgcolor'])) {
+    echo "              color: \"#000\",\n";
+  } else {
+    echo "              color: \"" . $_GET['bgcolor'] . "\",\n" ;
+  }
+?>
+            showPaletteOnly: true,
+            hideAfterPaletteSelect:true,
+            preferredFormat: "hex3",
+            palette: [
+              [ '000', '005', '00a', '00f', '050', '055', '05a', '05f' ],
+              [ '500', '505', '50a', '50f', '550', '555', '55a', '55f' ],
+              [ 'a00', 'a05', 'a0a', 'a0f', 'a50', 'a55', 'a5a', 'a5f' ],
+              [ 'f00', 'f05', 'f0a', 'f0f', 'f50', 'f55', 'f5a', 'f5f' ],
+              [ '0a0', '0a5', '0aa', '0af', '0f0', '0f5', '0fa', '0ff' ],
+              [ '5a0', '5a5', '5aa', '5af', '5f0', '5f5', '5fa', '5ff' ],
+              [ 'aa0', 'aa5', 'aaa', 'aaf', 'af0', 'af5', 'afa', 'aff' ],
+              [ 'fa0', 'fa5', 'faa', 'faf', 'ff0', 'ff5', 'ffa', 'fff' ]
+            ]
+        });
+
         $("#cancel").click(function() {
           console.log("Cancel");
           document.location = closeURL;

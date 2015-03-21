@@ -27,7 +27,8 @@ enum {
   CONFIG_KEY_FULLDIGITS = 15,
   CONFIG_KEY_BATTERY = 16,
   CONFIG_KEY_BLUETOOTH = 17,
-  CONFIG_KEY_COLORTHEME = 18
+  CONFIG_KEY_COLORTHEME = 18,
+  CONFIG_KEY_BGCOLOR = 19
 };
 
 
@@ -67,6 +68,8 @@ int fullDigits = 0;
 int batteryStatus = 1;
 int bluetoothStatus = 1;
 int colorTheme = 0;
+GColor bgcolor;
+static char bgColorText[10] = "#000";
 
 bool digitShapesChanged = false;
 
@@ -496,13 +499,30 @@ bool checkAndSaveInt(int *var, int val, int key) {
     ret = persist_write_int(key, val);
     if (ret < 0) {
       APP_LOG(APP_LOG_LEVEL_DEBUG, "checkAndSaveInt() : persist_write_int(%d, %d) returned %d",
-              val, key, ret);
+              key, val, ret);
     }
     return true;
   } else {
     return false;
   }
 }
+
+bool checkAndSaveString(char **var, char *val, int key) {
+  int ret;
+
+  if (strcmp(*var, val) != 0) {
+    strcpy(*var, val);
+    ret = persist_write_string(key, val);
+    if (ret < 0) {
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "checkAndSaveString() : persist_write_string(%d, %s) returned %d",
+              key, val, ret);
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
 static inline int8_t getDigitTile(int8_t *digit, int x, int y) {
   if ( (x < 0) || (x > 2) || (y < 0) || (y > 4)) {
     return 0;
@@ -618,20 +638,23 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *corners = dict_find(received, CONFIG_KEY_ROUNDCORNERS);
   Tuple *digits = dict_find(received, CONFIG_KEY_FULLDIGITS);
   Tuple *colorThemeTuple = dict_find(received, CONFIG_KEY_COLORTHEME);
+  Tuple *bgColorTuple = dict_find(received, CONFIG_KEY_BGCOLOR);
 
-  if (dateorder && weekday && battery && bluetooth && lang && stripes && corners && digits && colorThemeTuple) {
+  if (dateorder && weekday && battery && bluetooth && lang && stripes && corners && digits && colorThemeTuple && bgColorTuple) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config:");
     APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, lang=%d",
             (int)dateorder->value->int32, (int)weekday->value->int32,
             (int)battery->value->int32, (int)bluetooth->value->int32,
             (int)lang->value->int32);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d, bgColor=%s",
             (int)stripes->value->int32, (int)corners->value->int32,
-            (int)digits->value->int32, (int)colorThemeTuple->value->int32);
+            (int)digits->value->int32, (int)colorThemeTuple->value->int32,
+            (char *)bgColorTuple->value->cstring);
 
     somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
     somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
     somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
+    somethingChanged |= checkAndSaveString((char **)&bgColorText, bgColorTuple->value->cstring, CONFIG_KEY_BGCOLOR);
 
     checkAndSaveInt(&batteryStatus, battery->value->int32, CONFIG_KEY_BATTERY);
     checkAndSaveInt(&bluetoothStatus, bluetooth->value->int32, CONFIG_KEY_BLUETOOTH);
@@ -722,18 +745,25 @@ void readConfig() {
     persist_write_int(CONFIG_KEY_COLORTHEME, colorTheme);
   }
 
+  if (persist_exists(CONFIG_KEY_BGCOLOR)) {
+    persist_read_string(CONFIG_KEY_BGCOLOR, bgColorText, sizeof(bgColorText));
+  } else {
+    strcpy(bgColorText, "#000");
+    persist_write_string(CONFIG_KEY_BGCOLOR, bgColorText);
+  }
+
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Stored config :");
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d",
           USDate, showWeekday, batteryStatus, bluetoothStatus);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  lang=%d, stripedDigits=%d, roundCorners=%d, fullDigits=%d",
           curLang, stripedDigits, roundCorners, fullDigits);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d", colorTheme);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, bgcolor=%s", colorTheme, bgColorText);
 }
 
 static void app_message_init(void) {
   app_message_register_inbox_received(in_received_handler);
   app_message_register_inbox_dropped(in_dropped_handler);
-  app_message_open(160, 160);
+  app_message_open(255, 255);
 }
 
 void initDigitCorners() {
