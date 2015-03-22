@@ -247,10 +247,11 @@
         </fieldset>
       </div>
 
-      <div id="bgcolorpickerdiv" data-role="fieldcontain">
+      <div id="colorpickerdiv" data-role="fieldcontain">
         <fieldset data-role="controlgroup">
-          <legend>Background Color (Color Pebble only)</legend>
-          <input type='color' id="bgcolorpicker" name="bgcolorpicker" data-theme=""/>
+          <legend>Colors (Color Pebble only)</legend>
+            <input type='color' id="bgcolorpicker" name="bgcolorpicker"><label for="bgcolorpicker">Background Color</label>
+            <input type='color' id="fgcolorpicker" name="fgcolorpicker"><label for="fgcolorpicker">Foreground Color</label>
         </fieldset>
       </div>
 
@@ -267,6 +268,16 @@
   }
 ?>
 
+      var curBGColor = "#000000";
+      var curFGColor = "#ffffff";
+
+      function setBGColor(color) {
+        curBGColor = color.toHexString();
+      }
+
+      function setFGColor(color) {
+        curFGColor = color.toHexString();
+      }
 
       function saveOptions() {
         var options = {
@@ -279,7 +290,8 @@
           'roundcorners': parseInt($("input[name=roundcorners]:checked").val(), 10),
           'fulldigits': parseInt($("input[name=fulldigits]:checked").val(), 10),
           'colortheme': parseInt($("input[name=colortheme]:checked").val(), 10),
-          'color': $("#bgcolorpicker").val()
+          'bgcolor': curBGColor,
+          'fgcolor': curFGColor
         }
         return options;
       }
@@ -297,6 +309,35 @@
             showPaletteOnly: true,
             hideAfterPaletteSelect:true,
             preferredFormat: "hex3",
+            change: function(color) {
+              setBGColor(color);
+            },
+            palette: [
+              [ '000', '005', '00a', '00f', '050', '055', '05a', '05f' ],
+              [ '500', '505', '50a', '50f', '550', '555', '55a', '55f' ],
+              [ 'a00', 'a05', 'a0a', 'a0f', 'a50', 'a55', 'a5a', 'a5f' ],
+              [ 'f00', 'f05', 'f0a', 'f0f', 'f50', 'f55', 'f5a', 'f5f' ],
+              [ '0a0', '0a5', '0aa', '0af', '0f0', '0f5', '0fa', '0ff' ],
+              [ '5a0', '5a5', '5aa', '5af', '5f0', '5f5', '5fa', '5ff' ],
+              [ 'aa0', 'aa5', 'aaa', 'aaf', 'af0', 'af5', 'afa', 'aff' ],
+              [ 'fa0', 'fa5', 'faa', 'faf', 'ff0', 'ff5', 'ffa', 'fff' ]
+            ]
+        });
+
+        $("#fgcolorpicker").spectrum({
+<?php
+  if (!isset($_GET['fgcolor'])) {
+    echo "              color: \"#000\",\n";
+  } else {
+    echo "              color: \"" . $_GET['fgcolor'] . "\",\n" ;
+  }
+?>
+            showPaletteOnly: true,
+            hideAfterPaletteSelect:true,
+            preferredFormat: "hex3",
+            change: function(color) {
+              setFGColor(color);
+            },
             palette: [
               [ '000', '005', '00a', '00f', '050', '055', '05a', '05f' ],
               [ '500', '505', '50a', '50f', '550', '555', '55a', '55f' ],

@@ -21,7 +21,8 @@
     "battery": 16,
     "bluetooth": 17,
     "colortheme": 18,
-    "bgcolor": 19
+    "bgcolor": 19,
+    "fgcolor": 20
   },
   "resources": {
     "media": [

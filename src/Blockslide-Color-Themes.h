@@ -49,8 +49,11 @@ void initColors() {
 }
 #else
 
+#define GColorFromHEX(v) GColorBlack
+
 void initColors() {
   // Do nothing!
 }
 
 #endif
+

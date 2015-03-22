@@ -28,7 +28,8 @@ enum {
   CONFIG_KEY_BATTERY = 16,
   CONFIG_KEY_BLUETOOTH = 17,
   CONFIG_KEY_COLORTHEME = 18,
-  CONFIG_KEY_BGCOLOR = 19
+  CONFIG_KEY_BGCOLOR = 19,
+  CONFIG_KEY_FGCOLOR = 20
 };
 
 
@@ -68,8 +69,9 @@ int fullDigits = 0;
 int batteryStatus = 1;
 int bluetoothStatus = 1;
 int colorTheme = 0;
-GColor bgcolor;
-static char bgColorText[10] = "#000";
+GColor bgColor, fgColor;
+static char bgColorText[10] = "#000000";
+static char fgColorText[10] = "#ffffff";
 
 bool digitShapesChanged = false;
 
@@ -85,6 +87,8 @@ typedef struct {
 } digitSlot;
 
 Window *window;
+Layer *mainLayer;
+Layer *rootLayer;
 
 digitSlot slot[NUMSLOTS]; // 4 big digits for the hour, 6 small for the date
 int startDigit[NUMSLOTS] = {
@@ -151,19 +155,25 @@ digitSlot *findSlot(Layer *layer) {
   return NULL;
 }
 
+void updateMainLayer(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  graphics_context_set_fill_color(ctx, bgColor);
+  graphics_fill_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h), 0, GCornerNone);
+}
+
 void updateSlot(Layer *layer, GContext *ctx) {
   int t, tx1, tx2, ty1, ty2, ox, oy;
   int cornerRadius = 0;
   uint8_t curCorner, prevCorner;
   GCornerMask cornerMask;
-  GRect bounds;
+  //GRect bounds;
   digitSlot *slot;
   static unsigned int animMiddle = ANIMATION_NORMALIZED_MAX / 2;
 
   slot = findSlot(layer);
-  graphics_context_set_fill_color(ctx, GColorBlack);
-  bounds = layer_get_bounds(slot->layer);
-  graphics_fill_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h), 0, GCornerNone);
+  //graphics_context_set_fill_color(ctx, bgColor);
+  //bounds = layer_get_bounds(slot->layer);
+  //graphics_fill_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h), 0, GCornerNone);
 
   curCorner=slot->curDigit;
   /*
@@ -222,7 +232,11 @@ void updateSlot(Layer *layer, GContext *ctx) {
       }
     }
 #ifdef PBL_COLOR
-    graphics_context_set_fill_color(ctx, color[colorTheme][(digits[slot->curDigit][t][1]%5)]);
+    if (colorTheme) {
+      graphics_context_set_fill_color(ctx, color[colorTheme][(digits[slot->curDigit][t][1]%5)]);
+    } else {
+      graphics_context_set_fill_color(ctx, fgColor);
+    }
 #else
     graphics_context_set_fill_color(ctx, GColorWhite);
 #endif
@@ -256,6 +270,8 @@ void deinitSlot(int i) {
 
 void redrawAllSlots() {
   int i;
+
+  layer_mark_dirty(mainLayer);
 
   for (i=0; i<NUMSLOTS; i++) {
     layer_mark_dirty(slot[i].layer);
@@ -421,7 +437,7 @@ void handle_tap(AccelAxisType axis, int32_t direction) {
     createAnim();
     animation_schedule(anim);
     if (timer==NULL)
-    timer= app_timer_register(BATTERYDELAY, handle_timer, NULL);
+      timer= app_timer_register(BATTERYDELAY, handle_timer, NULL);
   }
 }
 
@@ -480,7 +496,7 @@ void handle_bluetooth(bool connected) {
       createAnim();
       animation_schedule(anim);
       if (timer==NULL)
-      timer=app_timer_register(BATTERYDELAY, handle_timer, NULL);
+        timer=app_timer_register(BATTERYDELAY, handle_timer, NULL);
     }
   }
 }
@@ -507,18 +523,20 @@ bool checkAndSaveInt(int *var, int val, int key) {
   }
 }
 
-bool checkAndSaveString(char **var, char *val, int key) {
+bool checkAndSaveString(char *var, char *val, int key) {
   int ret;
 
-  if (strcmp(*var, val) != 0) {
-    strcpy(*var, val);
+  if (strcmp(var, val) != 0) {
+    strcpy(var, val);
     ret = persist_write_string(key, val);
-    if (ret < 0) {
+    if (ret < (int)strlen(val)) {
       APP_LOG(APP_LOG_LEVEL_DEBUG, "checkAndSaveString() : persist_write_string(%d, %s) returned %d",
               key, val, ret);
     }
     return true;
   } else {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "checkAndSaveString() : value has not changed (was : %s, is : %s)",
+            var, val);
     return false;
   }
 }
@@ -622,12 +640,38 @@ void swapDigitShapes() {
   calcDigitCorners(5);
 }
 
+int hexStringToInt(const char *hexString) {
+  if (hexString[0] == '#') {
+    hexString++;
+  }
+
+  int l = strlen(hexString);
+  int m = 1;
+  int retVal = 0;
+  for (int c=l-1; c>=0; c--, m *= 16) {
+    char cur = hexString[c];
+    if (( cur >= '0') && (cur <= '9')) {
+      retVal += (int)(cur - '0') * m;
+    } else if (( cur >= 'a') && (cur <= 'f')) {
+      retVal += (10 + (int)(cur - 'a')) * m;
+    }
+  }
+
+  return retVal;
+}
+
+GColor setColorFromText(const char *colorText) {
+  return GColorFromHEX(hexStringToInt(colorText));
+}
+
 void in_dropped_handler(AppMessageResult reason, void *context) {
 }
 
 void in_received_handler(DictionaryIterator *received, void *context) {
   bool somethingChanged = false;
   bool digitShapesHaveToBeSwapped = false;
+  bool bgColorChanged = false;
+  bool fgColorChanged = false;
 
   Tuple *dateorder = dict_find(received, CONFIG_KEY_DATEORDER);
   Tuple *weekday = dict_find(received, CONFIG_KEY_WEEKDAY);
@@ -639,27 +683,34 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *digits = dict_find(received, CONFIG_KEY_FULLDIGITS);
   Tuple *colorThemeTuple = dict_find(received, CONFIG_KEY_COLORTHEME);
   Tuple *bgColorTuple = dict_find(received, CONFIG_KEY_BGCOLOR);
+  Tuple *fgColorTuple = dict_find(received, CONFIG_KEY_FGCOLOR);
 
-  if (dateorder && weekday && battery && bluetooth && lang && stripes && corners && digits && colorThemeTuple && bgColorTuple) {
+  if (dateorder && weekday && battery && bluetooth && lang && stripes && corners && digits && colorThemeTuple && bgColorTuple && fgColorTuple) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config:");
     APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, lang=%d",
             (int)dateorder->value->int32, (int)weekday->value->int32,
             (int)battery->value->int32, (int)bluetooth->value->int32,
             (int)lang->value->int32);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d, bgColor=%s",
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
             (int)stripes->value->int32, (int)corners->value->int32,
-            (int)digits->value->int32, (int)colorThemeTuple->value->int32,
-            (char *)bgColorTuple->value->cstring);
+            (int)digits->value->int32, (int)colorThemeTuple->value->int32);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  bgColor=%s, fgColor=%s",
+            (char *)bgColorTuple->value->cstring, (char *)fgColorTuple->value->cstring);
 
     somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
     somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
     somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
-    somethingChanged |= checkAndSaveString((char **)&bgColorText, bgColorTuple->value->cstring, CONFIG_KEY_BGCOLOR);
 
     checkAndSaveInt(&batteryStatus, battery->value->int32, CONFIG_KEY_BATTERY);
     checkAndSaveInt(&bluetoothStatus, bluetooth->value->int32, CONFIG_KEY_BLUETOOTH);
 
     digitShapesChanged = false;
+
+    bgColorChanged = checkAndSaveString(bgColorText, bgColorTuple->value->cstring, CONFIG_KEY_BGCOLOR);
+    digitShapesChanged |= bgColorChanged;
+    fgColorChanged = checkAndSaveString(fgColorText, fgColorTuple->value->cstring, CONFIG_KEY_FGCOLOR);
+    digitShapesChanged |= fgColorChanged;
+
     digitShapesChanged |= checkAndSaveInt(&stripedDigits, stripes->value->int32, CONFIG_KEY_STRIPES);
     digitShapesChanged |= checkAndSaveInt(&roundCorners, corners->value->int32, CONFIG_KEY_ROUNDCORNERS);
 
@@ -667,6 +718,13 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     digitShapesChanged |= digitShapesHaveToBeSwapped;
     digitShapesChanged |= checkAndSaveInt(&colorTheme, colorThemeTuple->value->int32, CONFIG_KEY_COLORTHEME);
 
+    if (bgColorChanged) {
+      bgColor = setColorFromText(bgColorText);
+    }
+
+    if (fgColorChanged) {
+      fgColor = setColorFromText(fgColorText);
+    }
 
     if (digitShapesHaveToBeSwapped) {
       swapDigitShapes();
@@ -674,7 +732,9 @@ void in_received_handler(DictionaryIterator *received, void *context) {
 
     if (somethingChanged) {
       applyConfig();
-    } else if (digitShapesChanged) {
+    }
+
+    if (digitShapesChanged) {
       digitShapesChanged = false;
       redrawAllSlots();
     }
@@ -748,16 +808,25 @@ void readConfig() {
   if (persist_exists(CONFIG_KEY_BGCOLOR)) {
     persist_read_string(CONFIG_KEY_BGCOLOR, bgColorText, sizeof(bgColorText));
   } else {
-    strcpy(bgColorText, "#000");
+    strcpy(bgColorText, "#000000");
     persist_write_string(CONFIG_KEY_BGCOLOR, bgColorText);
   }
+  bgColor = setColorFromText(bgColorText);
+
+  if (persist_exists(CONFIG_KEY_FGCOLOR)) {
+    persist_read_string(CONFIG_KEY_FGCOLOR, fgColorText, sizeof(fgColorText));
+  } else {
+    strcpy(fgColorText, "#ffffff");
+    persist_write_string(CONFIG_KEY_FGCOLOR, fgColorText);
+  }
+  fgColor = setColorFromText(fgColorText);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Stored config :");
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d",
           USDate, showWeekday, batteryStatus, bluetoothStatus);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  lang=%d, stripedDigits=%d, roundCorners=%d, fullDigits=%d",
           curLang, stripedDigits, roundCorners, fullDigits);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, bgcolor=%s", colorTheme, bgColorText);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, bgcolor=%s, fgColor=%s", colorTheme, bgColorText, fgColorText);
 }
 
 static void app_message_init(void) {
@@ -775,7 +844,6 @@ void initDigitCorners() {
 }
 
 void handle_init() {
-  Layer *rootLayer;
   int i;
 
   window = window_create();
@@ -790,9 +858,12 @@ void handle_init() {
   app_message_init();
 
   rootLayer = window_get_root_layer(window);
+  mainLayer = layer_create(layer_get_bounds(rootLayer));
+  layer_add_child(rootLayer, mainLayer);
+  layer_set_update_proc(mainLayer, updateMainLayer);
 
   for (i=0; i<NUMSLOTS; i++) {
-    initSlot(i, rootLayer);
+    initSlot(i, mainLayer);
   }
 
   initDigitCorners();
@@ -819,7 +890,7 @@ void handle_deinit() {
     app_timer_cancel(timer);
     timer=NULL;
   }
-  
+
   bluetooth_connection_service_unsubscribe();
   accel_tap_service_unsubscribe();
   tick_timer_service_unsubscribe();
@@ -829,6 +900,7 @@ void handle_deinit() {
     deinitSlot(i);
   }
   
+  layer_destroy(mainLayer);
   window_destroy(window);
 }
 
@@ -837,3 +909,4 @@ int main(void) {
   app_event_loop();
   handle_deinit();
 }
+

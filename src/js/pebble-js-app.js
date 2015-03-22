@@ -1,51 +1,70 @@
-var dateorder = localStorage.getItem("dateorder");
-if (!dateorder) {
-	dateorder = 1;
-}
+var dateorder;
+var weekday;
+var battery;
+var bluetooth;
+var lang;
+var stripes;
+var roundcorners;
+var fulldigits;
+var colortheme;
+var bgcolor;
+var fgcolor;
 
-var weekday = localStorage.getItem("weekday");
-if (!weekday) {
-	weekday = 0;
-}
+function readConfig() {
+  dateorder = localStorage.getItem("dateorder");
+  if (!dateorder) {
+    dateorder = 1;
+  }
 
-var battery = localStorage.getItem("battery");
-if (!battery) {
-	battery = 1;
-}
+  weekday = localStorage.getItem("weekday");
+  if (!weekday) {
+    weekday = 0;
+  }
 
-var bluetooth = localStorage.getItem("bluetooth");
-if (!bluetooth) {
-	bluetooth = 1;
-}
+  battery = localStorage.getItem("battery");
+  if (!battery) {
+    battery = 1;
+  }
 
-var lang = localStorage.getItem("lang");
-if (!lang) {
-	lang = 1;
-}
+  bluetooth = localStorage.getItem("bluetooth");
+  if (!bluetooth) {
+    bluetooth = 1;
+  }
 
-var stripes = localStorage.getItem("stripes");
-if (!stripes) {
-	stripes = 1;
-}
+  lang = localStorage.getItem("lang");
+  if (!lang) {
+    lang = 1;
+  }
 
-var roundcorners = localStorage.getItem("roundcorners");
-if (!roundcorners) {
-	roundcorners = 1;
-}
+  stripes = localStorage.getItem("stripes");
+  if (!stripes) {
+    stripes = 1;
+  }
 
-var fulldigits = localStorage.getItem("fulldigits");
-if ((fulldigits != 0) && (fulldigits != 1)) {
-  fulldigits = 0;
-}
+  roundcorners = localStorage.getItem("roundcorners");
+  if (!roundcorners) {
+    roundcorners = 1;
+  }
 
-var colortheme = localStorage.getItem("colortheme");
-if (!colortheme) {
-  colortheme = 0;
-}
+  fulldigits = localStorage.getItem("fulldigits");
+  if ((fulldigits != 0) && (fulldigits != 1)) {
+    fulldigits = 0;
+  }
 
-var bgcolor = localStorage.getItem("bgcolor");
-if (!bgcolor) {
-  bgcolor = "#000";
+  colortheme = localStorage.getItem("colortheme");
+  if (!colortheme) {
+    colortheme = 0;
+  }
+
+  bgcolor = localStorage.getItem("bgcolor");
+  if (!bgcolor) {
+    bgcolor = "#000000";
+  }
+
+  fgcolor = localStorage.getItem("fgcolor");
+  if (!fgcolor) {
+    fgcolor = "#ffffff";
+  }
 }
 
 function logVariables(msg) {
@@ -60,17 +79,20 @@ function logVariables(msg) {
   console.log("	fulldigits: " + fulldigits);
   console.log("	colortheme: " + colortheme);
   console.log("	bgcolor: " + bgcolor);
-
+  console.log("	fgcolor: " + fgcolor);
 };
 
 Pebble.addEventListener("ready", function() {
   logVariables("Ready Event");
-	Pebble.sendAppMessage(JSON.parse('{"dateorder":'+dateorder+',"weekday":'+weekday+',"battery":'+battery+',"bluetooth":'+bluetooth+',"lang":'+lang+',"stripes":'+stripes+',"roundcorners":'+roundcorners+',"fulldigits":'+fulldigits+',"colortheme":'+colortheme+',"bgcolor":'+bgcolor+'}'));
+  readConfig();
+	Pebble.sendAppMessage(JSON.parse('{"dateorder":'+dateorder+',"weekday":'+weekday+',"battery":'+battery+',"bluetooth":'+bluetooth+',"lang":'+lang+',"stripes":'+stripes+',"roundcorners":'+roundcorners+',"fulldigits":'+fulldigits+',"colortheme":'+colortheme+',"bgcolor":"'+bgcolor+'","fgcolor":"'+fgcolor+'"}'));
 });
 
 Pebble.addEventListener("showConfiguration", function(e) {
 	logVariables("showConfiguration Event");
-	Pebble.openURL("http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide.php?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&bgcolor=" + bgcolor);
+  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide.php?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&bgcolor=" + encodeURIComponent(bgcolor) + "&fgcolor=" + encodeURIComponent(fgcolor);
+  console.log(url);
+	Pebble.openURL(url);
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {
@@ -111,4 +133,8 @@ Pebble.addEventListener("webviewclosed", function(e) {
   bgcolor = configuration["bgcolor"];
 	localStorage.setItem("bgcolor", bgcolor);
 
+  fgcolor = configuration["fgcolor"];
+	localStorage.setItem("fgcolor", fgcolor);
+
 });
+
