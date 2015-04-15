@@ -112,7 +112,7 @@ bool lastBluetoothStatus = true;
 static AppTimer *timer;
 
 AnimationImplementation animImpl;
-Animation *anim;
+Animation *anim = NULL;
 
 char buffer[256] = "";
 
@@ -278,6 +278,11 @@ void redrawAllSlots() {
   }
 }
 
+void destroyAnim(Animation *animation) {
+  if (animation != NULL) {
+    animation_destroy(animation);
+  }
+}
 
 void createAnim() {
   anim = animation_create();
@@ -870,8 +875,11 @@ void handle_init() {
 
   animImpl.setup = NULL;
   animImpl.update = animateDigits;
+#ifdef PBL_PLATFORM_APLITE
+  animImpl.teardown = destroyAnim;
+#else
   animImpl.teardown = NULL;
-
+#endif
   createAnim();
 
   timer = app_timer_register(STARTDELAY, handle_timer, NULL);
@@ -890,6 +898,8 @@ void handle_deinit() {
     app_timer_cancel(timer);
     timer=NULL;
   }
+
+  destroyAnim(anim);
 
   bluetooth_connection_service_unsubscribe();
   accel_tap_service_unsubscribe();

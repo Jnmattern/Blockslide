@@ -249,9 +249,12 @@
 
       <div id="colorpickerdiv" data-role="fieldcontain">
         <fieldset data-role="controlgroup">
-          <legend>Colors (Color Pebble only)</legend>
-            <input type='color' id="bgcolorpicker" name="bgcolorpicker"><label for="bgcolorpicker">Background Color</label>
-            <input type='color' id="fgcolorpicker" name="fgcolorpicker"><label for="fgcolorpicker">Foreground Color</label>
+          <legend>Background Color (Color Pebble only)</legend>
+            <input id="bgcolorpicker" name="bgcolorpicker">
+        </fieldset>
+        <fieldset data-role="controlgroup">
+          <legend>Foreground Color (Color Pebble only)</legend>
+            <input id="fgcolorpicker" name="fgcolorpicker">
         </fieldset>
       </div>
 
