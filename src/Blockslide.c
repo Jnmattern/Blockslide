@@ -279,9 +279,10 @@ void redrawAllSlots() {
 }
 
 void destroyAnim(Animation *animation) {
-  if (animation != NULL) {
-    animation_destroy(animation);
+  if (anim != NULL) {
+    animation_destroy(anim);
   }
+  anim = NULL;
 }
 
 void createAnim() {

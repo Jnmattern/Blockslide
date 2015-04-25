@@ -367,6 +367,7 @@
           document.location = location;
         });
 
+        $('.sp-replacer').unwrap();
       });
     </script>
 </body>
