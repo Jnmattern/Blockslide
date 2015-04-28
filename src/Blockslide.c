@@ -292,7 +292,11 @@ void createAnim() {
   animation_set_implementation(anim, &animImpl);
 }
 
+#ifdef PBL_PLATFORM_APLITE
 void animateDigits(struct Animation *anim, const uint32_t normTime) {
+#else
+void animateDigits(Animation *anim, const AnimationProgress normTime) {
+#endif
   int i;
 
   for (i=0; i<NUMSLOTS; i++) {
