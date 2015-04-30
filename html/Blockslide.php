@@ -225,15 +225,31 @@
         </fieldset>
       </div>
 
-      <div id="colortheme" data-role="fieldcontain">
-        <fieldset data-role="controlgroup" data-type="horizontal">
-          <legend>Color Theme (Color Pebble only)</legend>
+<?php
+  if (isset($_GET['colorCapable'])) {
+    $colorCapable = $_GET['colorCapable'];
+  } else {
+    $colorCapable = 0;
+  }
+
+  $showDiv = "";
+
+  if (!$colorCapable) {
+    $showDiv = " style=\"display: none;\"";
+  }
+?>
 
 <?php
-	if (!isset($_GET['colortheme'])) {
-		$colortheme = 0;
-	} else {
+    echo "<div id=\"colortheme\" data-role=\"fieldcontain\"" . $showDiv . ">\n";
+?>
+        <fieldset data-role="controlgroup" data-type="horizontal">
+          <legend>Color Theme</legend>
+
+<?php
+	if (isset($_GET['colortheme'])) {
 		$colortheme = $_GET['colortheme'];
+	} else {
+		$colortheme = 0;
 	}
 
   for ($i=0; $i<5; $i++) {
@@ -247,19 +263,24 @@
         </fieldset>
       </div>
 
-      <div id="colorpickerdiv" data-role="fieldcontain">
+<?php
+  echo "<div id=\"colorpickerdiv\" data-role=\"fieldcontain\"" . $showDiv . ">\n";
+  ?>
+    <div class="ui-grid-a">
+      <div class="ui-block-a">
         <fieldset data-role="controlgroup">
-          <legend>Background Color (Color Pebble only)</legend>
+          <legend>Background Color</legend>
             <input id="bgcolorpicker" name="bgcolorpicker">
         </fieldset>
+      </div>
+      <div class="ui-block-b">
         <fieldset data-role="controlgroup">
-          <legend>Foreground Color (Color Pebble only)</legend>
+          <legend>Foreground Color</legend>
             <input id="fgcolorpicker" name="fgcolorpicker">
         </fieldset>
       </div>
-
-
-</div>
+    </div>
+  </div>
 
 
   <script>
@@ -312,15 +333,14 @@
 
         $("#bgcolorpicker").spectrum({
 <?php
-  if (!isset($_GET['bgcolor'])) {
-    echo "              color: \"#000\",\n";
-  } else {
+  if (isset($_GET['bgcolor'])) {
     echo "              color: \"" . $_GET['bgcolor'] . "\",\n" ;
+  } else {
+    echo "              color: \"#000000\",\n";
   }
 ?>
             showPaletteOnly: true,
             hideAfterPaletteSelect:true,
-            preferredFormat: "hex3",
             change: function(color) {
               setBGColor(color);
             },
@@ -338,15 +358,14 @@
 
         $("#fgcolorpicker").spectrum({
 <?php
-  if (!isset($_GET['fgcolor'])) {
-    echo "              color: \"#000\",\n";
-  } else {
+  if (isset($_GET['fgcolor'])) {
     echo "              color: \"" . $_GET['fgcolor'] . "\",\n" ;
+  } else {
+    echo "              color: \"#ffffff\",\n";
   }
 ?>
             showPaletteOnly: true,
             hideAfterPaletteSelect:true,
-            preferredFormat: "hex3",
             change: function(color) {
               setFGColor(color);
             },

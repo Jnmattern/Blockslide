@@ -82,6 +82,22 @@ function logVariables(msg) {
   console.log("	fgcolor: " + fgcolor);
 };
 
+function isWatchColorCapable() {
+  var colorCapable = 0;
+
+  if(Pebble.getActiveWatchInfo) {
+    var watch_name = Pebble.getActiveWatchInfo().model;
+
+    if (watch_name.indexOf("pebble_time") >= 0) {
+      colorCapable = 1;
+    } else if (watch_name.indexOf("qemu_platform_basalt") >= 0) {
+      colorCapable = 1;
+    }
+  }
+  
+  return colorCapable;
+}
+
 Pebble.addEventListener("ready", function() {
   logVariables("Ready Event");
   readConfig();
@@ -90,7 +106,7 @@ Pebble.addEventListener("ready", function() {
 
 Pebble.addEventListener("showConfiguration", function(e) {
 	logVariables("showConfiguration Event");
-  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide.php?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&bgcolor=" + encodeURIComponent(bgcolor) + "&fgcolor=" + encodeURIComponent(fgcolor);
+  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide.php?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&bgcolor=" + encodeURIComponent(bgcolor) + "&fgcolor=" + encodeURIComponent(fgcolor) + "&colorCapable=" + isWatchColorCapable();
   console.log(url);
 	Pebble.openURL(url);
 });
