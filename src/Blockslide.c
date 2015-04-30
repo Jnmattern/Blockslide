@@ -696,17 +696,6 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *fgColorTuple = dict_find(received, CONFIG_KEY_FGCOLOR);
 
   if (dateorder && weekday && battery && bluetooth && lang && stripes && corners && digits && colorThemeTuple && bgColorTuple && fgColorTuple) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config:");
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, lang=%d",
-            (int)dateorder->value->int32, (int)weekday->value->int32,
-            (int)battery->value->int32, (int)bluetooth->value->int32,
-            (int)lang->value->int32);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
-            (int)stripes->value->int32, (int)corners->value->int32,
-            (int)digits->value->int32, (int)colorThemeTuple->value->int32);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  bgColor=%s, fgColor=%s",
-            (char *)bgColorTuple->value->cstring, (char *)fgColorTuple->value->cstring);
-
     somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
     somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
     somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
@@ -727,6 +716,13 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     digitShapesHaveToBeSwapped = checkAndSaveInt(&fullDigits, digits->value->int32, CONFIG_KEY_FULLDIGITS);
     digitShapesChanged |= digitShapesHaveToBeSwapped;
     digitShapesChanged |= checkAndSaveInt(&colorTheme, colorThemeTuple->value->int32, CONFIG_KEY_COLORTHEME);
+
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config:");
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, lang=%d",
+            USDate, showWeekday, batteryStatus, bluetoothStatus, curLang);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
+            stripedDigits, roundCorners, fullDigits, colorTheme);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  bgColor=%s, fgColor=%s", bgColorText, fgColorText);
 
     if (bgColorChanged) {
       bgColor = setColorFromText(bgColorText);

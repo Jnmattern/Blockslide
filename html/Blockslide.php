@@ -264,15 +264,24 @@
 
   <script>
 <?php
-  if (!isset($_GET['return_to'])) {
-    echo 'var closeURL = "pebblejs://close#";';
+  if (isset($_GET['return_to'])) {
+    echo "var closeURL = \"" . $_GET['return_to'] . "\";\n";
   } else {
-    echo 'var closeURL = "' . $_GET['return_to'] . '";';
+    echo "var closeURL = \"pebblejs://close#\";\n";
+  }
+
+  if (isset($_GET['bgcolor'])) {
+    echo "var curBGColor = \"" . $_GET['bgcolor'] . "\";\n";
+  } else {
+    echo "var curBGColor = \"#000000\";\n";
+  }
+
+  if (isset($_GET['fgcolor'])) {
+    echo "var curFGColor = \"" . $_GET['fgcolor'] . "\";\n";
+  } else {
+    echo "var curFGColor = \"#ffffff\";\n";
   }
 ?>
-
-      var curBGColor = "#000000";
-      var curFGColor = "#ffffff";
 
       function setBGColor(color) {
         curBGColor = color.toHexString();
