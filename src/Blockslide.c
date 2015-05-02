@@ -68,7 +68,7 @@ int roundCorners = 1;
 int fullDigits = 0;
 int batteryStatus = 1;
 int bluetoothStatus = 1;
-int colorTheme = 0;
+int colorTheme = 1;
 GColor bgColor, fgColor;
 static char bgColorText[10] = "#000000";
 static char fgColorText[10] = "#ffffff";

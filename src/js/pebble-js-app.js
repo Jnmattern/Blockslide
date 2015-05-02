@@ -53,7 +53,7 @@ function readConfig() {
 
   colortheme = localStorage.getItem("colortheme");
   if (!colortheme) {
-    colortheme = 0;
+    colortheme = 1;
   }
 
   bgcolor = localStorage.getItem("bgcolor");
