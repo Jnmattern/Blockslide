@@ -166,27 +166,13 @@ void updateSlot(Layer *layer, GContext *ctx) {
   int cornerRadius = 0;
   uint8_t curCorner, prevCorner;
   GCornerMask cornerMask;
-  //GRect bounds;
   digitSlot *slot;
   static unsigned int animMiddle = ANIMATION_NORMALIZED_MAX / 2;
 
   slot = findSlot(layer);
-  //graphics_context_set_fill_color(ctx, bgColor);
-  //bounds = layer_get_bounds(slot->layer);
-  //graphics_fill_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h), 0, GCornerNone);
-
   curCorner=slot->curDigit;
-  /*
-   if (curCorner > NO_ROUND_CORNER) {
-   curCorner = NO_ROUND_CORNER; //prevent error on mising corner data
-   }
-   */
   prevCorner=slot->prevDigit;
-  /*
-   if (prevCorner > NO_ROUND_CORNER) {
-   prevCorner = NO_ROUND_CORNER; //prevent error on mising corner data
-   }
-   */
+
   for (t=0; t<13; t++) {
     cornerMask = GCornerNone;
     cornerRadius = 0;
@@ -211,7 +197,7 @@ void updateSlot(Layer *layer, GContext *ctx) {
 
     if (roundCorners) {
       if (digitCorners[curCorner][t] != digitCorners[prevCorner][t]) {
-        // ToDo: fix calculation. Corner become smaller till half, and bigger afterward;
+        // Corner become smaller till half, and bigger afterward;
         if (slot->normTime > ANIMATION_NORMALIZED_MAX) {
           cornerRadius = 0;
           cornerMask = digitCorners[prevCorner][t]; //point to corner of prv digit
@@ -900,13 +886,12 @@ void handle_deinit() {
     timer=NULL;
   }
 
-  destroyAnim(anim);
+  //destroyAnim(anim);
 
   bluetooth_connection_service_unsubscribe();
   accel_tap_service_unsubscribe();
   tick_timer_service_unsubscribe();
-  animation_destroy(anim);
-  
+
   for (i=0; i<NUMSLOTS; i++) {
     deinitSlot(i);
   }
