@@ -157,7 +157,15 @@ digitSlot *findSlot(Layer *layer) {
 
 void updateMainLayer(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
-  graphics_context_set_fill_color(ctx, bgColor);
+#ifdef PBL_COLOR
+  if (colorTheme) {
+    graphics_context_set_fill_color(ctx, color[colorTheme][5]);
+  } else {
+    graphics_context_set_fill_color(ctx, bgColor);
+  }
+#else
+  graphics_context_set_fill_color(ctx, GColorBlack);
+#endif
   graphics_fill_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h), 0, GCornerNone);
 }
 
@@ -279,10 +287,11 @@ void createAnim() {
 }
 
 #ifdef PBL_PLATFORM_APLITE
-void animateDigits(struct Animation *anim, const uint32_t normTime) {
+void animateDigits(struct Animation *anim, const uint32_t normTime)
 #else
-void animateDigits(Animation *anim, const AnimationProgress normTime) {
+void animateDigits(Animation *anim, const AnimationProgress normTime)
 #endif
+{
   int i;
 
   for (i=0; i<NUMSLOTS; i++) {

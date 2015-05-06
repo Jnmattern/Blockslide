@@ -10,7 +10,7 @@ enum {
   COLOR_THEME_MAX
 };
 
-GColor color[COLOR_THEME_MAX][5];
+GColor color[COLOR_THEME_MAX][6];
 
 void initColors() {
   // White
@@ -19,6 +19,7 @@ void initColors() {
   color[COLOR_THEME_WHITE][2] = GColorWhite;
   color[COLOR_THEME_WHITE][3] = GColorWhite;
   color[COLOR_THEME_WHITE][4] = GColorWhite;
+  color[COLOR_THEME_WHITE][5] = GColorBlack;
 
   // Sunset
   color[COLOR_THEME_SUNSET][0] = GColorPastelYellow;
@@ -26,6 +27,7 @@ void initColors() {
   color[COLOR_THEME_SUNSET][2] = GColorRajah;
   color[COLOR_THEME_SUNSET][3] = GColorOrange;
   color[COLOR_THEME_SUNSET][4] = GColorRed;
+  color[COLOR_THEME_SUNSET][5] = GColorBlack;
 
   // Aquamarine
   color[COLOR_THEME_AQUAMARINE][0] = GColorCeleste;
@@ -33,6 +35,7 @@ void initColors() {
   color[COLOR_THEME_AQUAMARINE][2] = GColorMediumSpringGreen;
   color[COLOR_THEME_AQUAMARINE][3] = GColorJaegerGreen;
   color[COLOR_THEME_AQUAMARINE][4] = GColorIslamicGreen;
+  color[COLOR_THEME_AQUAMARINE][5] = GColorBlack;
 
   // Candy
   color[COLOR_THEME_CANDY][0] = GColorRichBrilliantLavender;
@@ -40,6 +43,7 @@ void initColors() {
   color[COLOR_THEME_CANDY][2] = GColorMagenta;
   color[COLOR_THEME_CANDY][3] = GColorFashionMagenta;
   color[COLOR_THEME_CANDY][4] = GColorFolly;
+  color[COLOR_THEME_CANDY][5] = GColorBlack;
 
   // Earth and Sky
   color[COLOR_THEME_EARTH_AND_SKY][0] = GColorVividCerulean;
@@ -47,6 +51,7 @@ void initColors() {
   color[COLOR_THEME_EARTH_AND_SKY][2] = GColorPastelYellow;
   color[COLOR_THEME_EARTH_AND_SKY][3] = GColorRajah;
   color[COLOR_THEME_EARTH_AND_SKY][4] = GColorWindsorTan;
+  color[COLOR_THEME_EARTH_AND_SKY][5] = GColorBlack;
 
   // Camouflage
   //color[COLOR_THEME_CAMOUFLAGE][0] = GColorDarkGreen;

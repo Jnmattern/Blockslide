@@ -257,7 +257,7 @@
     if ($i == $colortheme) {
       $s = " checked";
     }
-    echo '<input id="colortheme' . $i . '" name="colortheme" value="' . $i . '" data-theme="" type="radio"' . $s . '><label for="colortheme' . $i . '"><img src="color_theme_' . $i . '.png" width="68" height="66"><br/></label>';
+    echo '<input id="colortheme' . $i . '" name="colortheme" value="' . $i . '" data-theme="" type="radio"' . $s . '><label for="colortheme' . $i . '"><img id="img_' . $i . '" src="color_theme_' . $i . '.png" width="68" height="66"><br/></label>';
   }
 ?>
         </fieldset>
@@ -304,12 +304,70 @@
   }
 ?>
 
+  var fr, fg, fb, br, bg, bb;
+
+  var imgSrc = document.getElementById("img_0").src;
+
+  function calcColorComp() {
+    fr = parseInt(curFGColor.substr(1, 2), 16);
+    fg = parseInt(curFGColor.substr(3, 2), 16);
+    fb = parseInt(curFGColor.substr(5, 2), 16);
+    br = parseInt(curBGColor.substr(1, 2), 16);
+    bg = parseInt(curBGColor.substr(3, 2), 16);
+    bb = parseInt(curBGColor.substr(5, 2), 16);
+  }
+
+ function tintImage(imgElement) {
+        // Reset image
+        imgElement.src = imgSrc;
+
+        // create hidden canvas (using image dimensions)
+        var canvas = document.createElement("canvas");
+        canvas.width = imgElement.offsetWidth;
+        canvas.height = imgElement.offsetHeight;
+
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(imgElement,0,0);
+
+        var map = ctx.getImageData(0,0,imgElement.offsetWidth,imgElement.offsetHeight);
+        var imdata = map.data;
+
+        // convert image to grayscale
+        var r,g,b,avg;
+        for(var p = 0, len = imdata.length; p < len; p+=4) {
+          r = imdata[p]
+          g = imdata[p+1];
+          b = imdata[p+2];
+           
+          if ( (r == 0) && (g == 0) && (b == 0) ) {
+            // black -> background
+            imdata[p] = br;
+	    imdata[p+1] = bg; 
+	    imdata[p+2] = bb;
+          } else if ( (r == 255) && (g == 255) && (b == 255) ) {
+            // white -> foreground
+            imdata[p] = fr;
+	    imdata[p+1] = fg; 
+	    imdata[p+2] = fb;
+          }
+        }
+
+        ctx.putImageData(map,0,0);
+
+        // replace image source with canvas data
+        imgElement.src = canvas.toDataURL();
+  }
+
       function setBGColor(color) {
         curBGColor = color.toHexString();
+        calcColorComp();
+        tintImage(document.getElementById('img_0'));
       }
 
       function setFGColor(color) {
         curFGColor = color.toHexString();
+        calcColorComp();
+        tintImage(document.getElementById('img_0'));
       }
 
       function saveOptions() {
@@ -396,6 +454,9 @@
         });
 
         $('.sp-replacer').unwrap();
+
+                calcColorComp();
+                tintImage(document.getElementById('img_0'));
       });
     </script>
 </body>
