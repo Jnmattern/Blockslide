@@ -260,35 +260,18 @@
     echo '<input id="colortheme' . $i . '" name="colortheme" value="' . $i . '" data-theme="" type="radio"' . $s . '><label for="colortheme' . $i . '">';
 
     if ($i > 0) {
-      echo '<img id="img_' . $i . '" src="color_theme_' . $i . '.png" width="68" height="66"><br/>';
+      echo '<img id="img_' . $i . '" src="theme_' . $i . '.png" width="45" height="44"><br/>';
     } else {
 ?>
-    <div style="width: 68px; background-color: black; height: 66px; padding: 1px;"
-      id="img_0">
-      <div style="width: 66px; background-color: white; height: 12px; border-top-left-radius: 5px; border-top-right-radius: 5px; margin: 0px 1px 0px 1px;"
-        id="line_0">
-      </div>
-      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; float: left;"
-        id="line_11">
-      </div>
-      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; float: right;"
-        id="line_12">
-      </div>
-      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; clear: both; float: left;"
-        id="line_21">
-      </div>
-      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; float: right;"
-        id="line_22">
-      </div>
-      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; clear: both; float: left;"
-        id="line_31">
-      </div>
-      <div style="width: 22px; background-color: white; height: 12px; margin: 1px; float: right;"
-        id="line_32">
-      </div>
-      <div style="width: 66px; background-color: white; height: 12px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;  clear: both; margin: 1px;"
-        id="line_4">
-      </div>
+    <div style="width: 45px; background-color: black; height: 44px; padding: 2px 1px 1px 1px;" id="img_0">
+      <div style="width: 43px; background-color: white; height: 8px; border-top-left-radius: 5px; border-top-right-radius: 3px; margin: 0px 1px 0px 1px;" id="line_0"></div>
+      <div style="width: 15px; background-color: white; height: 7px;; margin: 1px 1px 0px 1px; float: left;" id="line_11"></div>
+      <div style="width: 15px; background-color: white; height: 7px;; margin: 1px 1px 0px 1px; float: right;" id="line_12"></div>
+      <div style="width: 15px; background-color: white; height: 7px;; margin: 1px 1px 0px 1px; clear: both; float: left;" id="line_21"></div>
+      <div style="width: 15px; background-color: white; height: 7px;; margin: 1px 1px 0px 1px; float: right;" id="line_22"></div>
+      <div style="width: 15px; background-color: white; height: 7px;; margin: 1px 1px 0px 1px; clear: both; float: left;" id="line_31"></div>
+      <div style="width: 15px; background-color: white; height: 7px;; margin: 1px; float: right;" id="line_32"></div>
+      <div style="width: 43px; background-color: white; height: 8px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; clear: both; margin: 1px;" id="line_4"></div>
     </div>
 <?php
     }
