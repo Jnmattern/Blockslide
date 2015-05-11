@@ -444,8 +444,7 @@
 
         $('.sp-replacer').unwrap();
 
-                calcColorComp();
-                tintImage(document.getElementById('img_0'));
+        tintImage();
       });
     </script>
 </body>
