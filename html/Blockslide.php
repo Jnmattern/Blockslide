@@ -18,9 +18,6 @@
 		<body>
 <div data-role="page" id="page1">
     <div data-theme="a" data-role="header" data-position="fixed">
-        <h3>
-            BlockSlide Configuration
-        </h3>
         <div class="ui-grid-a">
             <div class="ui-block-a">
                 <input id="cancel" type="submit" data-theme="c" data-icon="delete" data-iconpos="left"
@@ -34,6 +31,8 @@
     </div>
     <div data-role="content">
 
+<div class="ui-grid-a">
+  <div class="ui-block-a">
     <div id="dateorder" data-role="fieldcontain" class="ui-bar">
 			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Date format</legend>
@@ -57,7 +56,8 @@
 ?>
 			</fieldset>
 		</div>
-
+  </div>
+  <div class="ui-block-b">
     <div data-role="fieldcontain" class="ui-bar">
           <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
             <legend>Show day of week</legend>
@@ -81,7 +81,8 @@
 ?>
         </fieldset>
         </div>
-
+  </div>
+  <div class="ui-block-a">
     <div id="battery" data-role="fieldcontain" class="ui-bar">
 			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Tap to show battery</legend>
@@ -105,7 +106,8 @@
 ?>
 			</fieldset>
 		</div>
-
+  </div>
+  <div class="ui-block-b">
     <div id="bluetooth" data-role="fieldcontain" class="ui-bar">
       <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Vibrate on BT disconnect</legend>
@@ -129,6 +131,8 @@
 ?>
         </fieldset>
         </div>
+  </div>
+</div>
 
 
 		<div data-role="fieldcontain">
