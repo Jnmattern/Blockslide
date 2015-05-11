@@ -257,7 +257,43 @@
     if ($i == $colortheme) {
       $s = " checked";
     }
-    echo '<input id="colortheme' . $i . '" name="colortheme" value="' . $i . '" data-theme="" type="radio"' . $s . '><label for="colortheme' . $i . '"><img id="img_' . $i . '" src="color_theme_' . $i . '.png" width="68" height="66"><br/></label>';
+    echo '<input id="colortheme' . $i . '" name="colortheme" value="' . $i . '" data-theme="" type="radio"' . $s . '><label for="colortheme' . $i . '">';
+
+    if ($i > 0) {
+      echo '<img id="img_' . $i . '" src="color_theme_' . $i . '.png" width="68" height="66"><br/>';
+    } else {
+?>
+    <div style="width: 68px; background-color: black; height: 66px; padding: 1px;"
+      id="img_0">
+      <div style="width: 66px; background-color: white; height: 12px; border-top-left-radius: 5px; border-top-right-radius: 5px; margin: 0px 1px 0px 1px;"
+        id="line_0">
+      </div>
+      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; float: left;"
+        id="line_11">
+      </div>
+      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; float: right;"
+        id="line_12">
+      </div>
+      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; clear: both; float: left;"
+        id="line_21">
+      </div>
+      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; float: right;"
+        id="line_22">
+      </div>
+      <div style="width: 22px; background-color: white; height: 12px; margin: 1px 1px 0px 1px; clear: both; float: left;"
+        id="line_31">
+      </div>
+      <div style="width: 22px; background-color: white; height: 12px; margin: 1px; float: right;"
+        id="line_32">
+      </div>
+      <div style="width: 66px; background-color: white; height: 12px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;  clear: both; margin: 1px;"
+        id="line_4">
+      </div>
+    </div>
+<?php
+    }
+
+    echo '</label>';
   }
 ?>
         </fieldset>
@@ -308,66 +344,48 @@
 
   var imgSrc = document.getElementById("img_0").src;
 
+  var pebblePalette = [
+    [ '000', '005', '00a', '00f', '050', '055', '05a', '05f' ],
+    [ '500', '505', '50a', '50f', '550', '555', '55a', '55f' ],
+    [ 'a00', 'a05', 'a0a', 'a0f', 'a50', 'a55', 'a5a', 'a5f' ],
+    [ 'f00', 'f05', 'f0a', 'f0f', 'f50', 'f55', 'f5a', 'f5f' ],
+    [ '0a0', '0a5', '0aa', '0af', '0f0', '0f5', '0fa', '0ff' ],
+    [ '5a0', '5a5', '5aa', '5af', '5f0', '5f5', '5fa', '5ff' ],
+    [ 'aa0', 'aa5', 'aaa', 'aaf', 'af0', 'af5', 'afa', 'aff' ],
+    [ 'fa0', 'fa5', 'faa', 'faf', 'ff0', 'ff5', 'ffa', 'fff' ]
+  ];
+
   function calcColorComp() {
-    fr = parseInt(curFGColor.substr(1, 2), 16);
+/*    fr = parseInt(curFGColor.substr(1, 2), 16);
     fg = parseInt(curFGColor.substr(3, 2), 16);
     fb = parseInt(curFGColor.substr(5, 2), 16);
     br = parseInt(curBGColor.substr(1, 2), 16);
     bg = parseInt(curBGColor.substr(3, 2), 16);
     bb = parseInt(curBGColor.substr(5, 2), 16);
-  }
+*/  }
 
  function tintImage(imgElement) {
-        // Reset image
-        imgElement.src = imgSrc;
-
-        // create hidden canvas (using image dimensions)
-        var canvas = document.createElement("canvas");
-        canvas.width = imgElement.offsetWidth;
-        canvas.height = imgElement.offsetHeight;
-
-        var ctx = canvas.getContext("2d");
-        ctx.drawImage(imgElement,0,0);
-
-        var map = ctx.getImageData(0,0,imgElement.offsetWidth,imgElement.offsetHeight);
-        var imdata = map.data;
-
-        // convert image to grayscale
-        var r,g,b,avg;
-        for(var p = 0, len = imdata.length; p < len; p+=4) {
-          r = imdata[p]
-          g = imdata[p+1];
-          b = imdata[p+2];
-           
-          if ( (r == 0) && (g == 0) && (b == 0) ) {
-            // black -> background
-            imdata[p] = br;
-	    imdata[p+1] = bg; 
-	    imdata[p+2] = bb;
-          } else if ( (r == 255) && (g == 255) && (b == 255) ) {
-            // white -> foreground
-            imdata[p] = fr;
-	    imdata[p+1] = fg; 
-	    imdata[p+2] = fb;
-          }
-        }
-
-        ctx.putImageData(map,0,0);
-
-        // replace image source with canvas data
-        imgElement.src = canvas.toDataURL();
+   document.getElementById("img_0").style.backgroundColor = curBGColor;
+   document.getElementById("line_0").style.backgroundColor = curFGColor;
+   document.getElementById("line_11").style.backgroundColor = curFGColor;
+   document.getElementById("line_12").style.backgroundColor = curFGColor;
+   document.getElementById("line_21").style.backgroundColor = curFGColor;
+   document.getElementById("line_22").style.backgroundColor = curFGColor;
+   document.getElementById("line_31").style.backgroundColor = curFGColor;
+   document.getElementById("line_32").style.backgroundColor = curFGColor;
+   document.getElementById("line_4").style.backgroundColor = curFGColor;
   }
 
       function setBGColor(color) {
         curBGColor = color.toHexString();
         calcColorComp();
-        tintImage(document.getElementById('img_0'));
+        tintImage();
       }
 
       function setFGColor(color) {
         curFGColor = color.toHexString();
         calcColorComp();
-        tintImage(document.getElementById('img_0'));
+        tintImage();
       }
 
       function saveOptions() {
@@ -402,17 +420,8 @@
             change: function(color) {
               setBGColor(color);
             },
-            palette: [
-              [ '000', '005', '00a', '00f', '050', '055', '05a', '05f' ],
-              [ '500', '505', '50a', '50f', '550', '555', '55a', '55f' ],
-              [ 'a00', 'a05', 'a0a', 'a0f', 'a50', 'a55', 'a5a', 'a5f' ],
-              [ 'f00', 'f05', 'f0a', 'f0f', 'f50', 'f55', 'f5a', 'f5f' ],
-              [ '0a0', '0a5', '0aa', '0af', '0f0', '0f5', '0fa', '0ff' ],
-              [ '5a0', '5a5', '5aa', '5af', '5f0', '5f5', '5fa', '5ff' ],
-              [ 'aa0', 'aa5', 'aaa', 'aaf', 'af0', 'af5', 'afa', 'aff' ],
-              [ 'fa0', 'fa5', 'faa', 'faf', 'ff0', 'ff5', 'ffa', 'fff' ]
-            ]
-        });
+            palette: pebblePalette
+          });
 
         $("#fgcolorpicker").spectrum({
 <?php
@@ -427,16 +436,7 @@
             change: function(color) {
               setFGColor(color);
             },
-            palette: [
-              [ '000', '005', '00a', '00f', '050', '055', '05a', '05f' ],
-              [ '500', '505', '50a', '50f', '550', '555', '55a', '55f' ],
-              [ 'a00', 'a05', 'a0a', 'a0f', 'a50', 'a55', 'a5a', 'a5f' ],
-              [ 'f00', 'f05', 'f0a', 'f0f', 'f50', 'f55', 'f5a', 'f5f' ],
-              [ '0a0', '0a5', '0aa', '0af', '0f0', '0f5', '0fa', '0ff' ],
-              [ '5a0', '5a5', '5aa', '5af', '5f0', '5f5', '5fa', '5ff' ],
-              [ 'aa0', 'aa5', 'aaa', 'aaf', 'af0', 'af5', 'afa', 'aff' ],
-              [ 'fa0', 'fa5', 'faa', 'faf', 'ff0', 'ff5', 'ffa', 'fff' ]
-            ]
+            palette: pebblePalette
         });
 
         $("#cancel").click(function() {
