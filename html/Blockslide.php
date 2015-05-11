@@ -355,16 +355,7 @@
     [ 'fa0', 'fa5', 'faa', 'faf', 'ff0', 'ff5', 'ffa', 'fff' ]
   ];
 
-  function calcColorComp() {
-/*    fr = parseInt(curFGColor.substr(1, 2), 16);
-    fg = parseInt(curFGColor.substr(3, 2), 16);
-    fb = parseInt(curFGColor.substr(5, 2), 16);
-    br = parseInt(curBGColor.substr(1, 2), 16);
-    bg = parseInt(curBGColor.substr(3, 2), 16);
-    bb = parseInt(curBGColor.substr(5, 2), 16);
-*/  }
-
- function tintImage(imgElement) {
+  function tintImage() {
    document.getElementById("img_0").style.backgroundColor = curBGColor;
    document.getElementById("line_0").style.backgroundColor = curFGColor;
    document.getElementById("line_11").style.backgroundColor = curFGColor;
@@ -378,13 +369,11 @@
 
       function setBGColor(color) {
         curBGColor = color.toHexString();
-        calcColorComp();
         tintImage();
       }
 
       function setFGColor(color) {
         curFGColor = color.toHexString();
-        calcColorComp();
         tintImage();
       }
 
