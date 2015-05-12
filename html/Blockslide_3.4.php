@@ -315,11 +315,13 @@
 <?php
   echo "<div id=\"themecodediv\" data-role=\"fieldcontain\"" . $showDiv . ">\n";
 ?>
-    <fieldset data-role="fieldcontain" data-type="horizontal" data-mini="true">
-      <legend>Custom Theme Code</legend>
-        <input type="text" id="themecode" name="themecode">
-        <input id="parseTheme" type="button" data-theme="b" data-icon="check" data-iconpos="left" value="Use Theme Code" data-mini="true">
-    </fieldset>
+  <div class="ui-grid-a">
+    <div class="ui-block-a">
+      <input type="text" id="themecode" name="themecode" data-clear-btn="true">
+    </div>
+    <div class="ui-block-b">
+      <input id="parseTheme" type="button" data-theme="b" data-icon="check" data-iconpos="left" value="Use Code" data-mini="true">
+    </div>
   </div>
 
 
@@ -539,7 +541,6 @@
         });
 
         $("#parseTheme").click(function() {
-          $("#head").removeClass("ui-fixed-hidden");
           decodeTheme($("#themecode").val());
           setColors();
           setColorPickers();
