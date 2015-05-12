@@ -7,8 +7,7 @@ var stripes;
 var roundcorners;
 var fulldigits;
 var colortheme;
-var bgcolor;
-var fgcolor;
+var themecode;
 
 function readConfig() {
   dateorder = localStorage.getItem("dateorder");
@@ -56,14 +55,9 @@ function readConfig() {
     colortheme = 1;
   }
 
-  bgcolor = localStorage.getItem("bgcolor");
-  if (!bgcolor) {
-    bgcolor = "#000000";
-  }
-
-  fgcolor = localStorage.getItem("fgcolor");
-  if (!fgcolor) {
-    fgcolor = "#ffffff";
+  themecode = localStorage.getItem("themecode");
+  if (!themecode) {
+    themecode = "ffffffffffc0";
   }
 }
 
@@ -78,35 +72,22 @@ function logVariables(msg) {
   console.log("	roundcorners: " + roundcorners);
   console.log("	fulldigits: " + fulldigits);
   console.log("	colortheme: " + colortheme);
-  console.log("	bgcolor: " + bgcolor);
-  console.log("	fgcolor: " + fgcolor);
-};
+  console.log("	themecode: " + themecode);
+}
 
 function isWatchColorCapable() {
-  var colorCapable = 0;
-
-  if(Pebble.getActiveWatchInfo) {
-    var watch_name = Pebble.getActiveWatchInfo().model;
-
-    if (watch_name.indexOf("pebble_time") >= 0) {
-      colorCapable = 1;
-    } else if (watch_name.indexOf("qemu_platform_basalt") >= 0) {
-      colorCapable = 1;
-    }
-  }
-  
-  return colorCapable;
+  return (Pebble.getActiveWatchInfo && Pebble.getActiveWatchInfo().platform!='aplite');
 }
 
 Pebble.addEventListener("ready", function() {
   logVariables("Ready Event");
   readConfig();
-	Pebble.sendAppMessage(JSON.parse('{"dateorder":'+dateorder+',"weekday":'+weekday+',"battery":'+battery+',"bluetooth":'+bluetooth+',"lang":'+lang+',"stripes":'+stripes+',"roundcorners":'+roundcorners+',"fulldigits":'+fulldigits+',"colortheme":'+colortheme+',"bgcolor":"'+bgcolor+'","fgcolor":"'+fgcolor+'"}'));
+	Pebble.sendAppMessage(JSON.parse('{"dateorder":'+dateorder+',"weekday":'+weekday+',"battery":'+battery+',"bluetooth":'+bluetooth+',"lang":'+lang+',"stripes":'+stripes+',"roundcorners":'+roundcorners+',"fulldigits":'+fulldigits+',"colortheme":'+colortheme+',"themecode":"'+themecode+'"}'));
 });
 
 Pebble.addEventListener("showConfiguration", function(e) {
 	logVariables("showConfiguration Event");
-  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide.php?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&bgcolor=" + encodeURIComponent(bgcolor) + "&fgcolor=" + encodeURIComponent(fgcolor) + "&colorCapable=" + isWatchColorCapable();
+  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide_3.4.php?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&themecode=" + themecode + "&colorCapable=" + isWatchColorCapable();
   console.log(url);
 	Pebble.openURL(url);
 });
@@ -146,11 +127,7 @@ Pebble.addEventListener("webviewclosed", function(e) {
   colortheme = configuration["colortheme"];
 	localStorage.setItem("colortheme", colortheme);
 
-  bgcolor = configuration["bgcolor"];
-	localStorage.setItem("bgcolor", bgcolor);
-
-  fgcolor = configuration["fgcolor"];
-	localStorage.setItem("fgcolor", fgcolor);
-
+  themecode = configuration["themecode"];
+	localStorage.setItem("themecode", themecode);
 });
 

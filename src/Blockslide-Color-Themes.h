@@ -1,7 +1,7 @@
 #ifdef PBL_COLOR
 
 enum {
-  COLOR_THEME_WHITE = 0,
+  COLOR_THEME_CUSTOM = 0,
   COLOR_THEME_SUNSET,
   COLOR_THEME_AQUAMARINE,
   COLOR_THEME_CANDY,
@@ -14,12 +14,12 @@ GColor color[COLOR_THEME_MAX][6];
 
 void initColors() {
   // White
-  color[COLOR_THEME_WHITE][0] = GColorWhite;
-  color[COLOR_THEME_WHITE][1] = GColorWhite;
-  color[COLOR_THEME_WHITE][2] = GColorWhite;
-  color[COLOR_THEME_WHITE][3] = GColorWhite;
-  color[COLOR_THEME_WHITE][4] = GColorWhite;
-  color[COLOR_THEME_WHITE][5] = GColorBlack;
+  color[COLOR_THEME_CUSTOM][0] = GColorWhite;
+  color[COLOR_THEME_CUSTOM][1] = GColorWhite;
+  color[COLOR_THEME_CUSTOM][2] = GColorWhite;
+  color[COLOR_THEME_CUSTOM][3] = GColorWhite;
+  color[COLOR_THEME_CUSTOM][4] = GColorWhite;
+  color[COLOR_THEME_CUSTOM][5] = GColorBlack;
 
   // Sunset
   color[COLOR_THEME_SUNSET][0] = GColorPastelYellow;

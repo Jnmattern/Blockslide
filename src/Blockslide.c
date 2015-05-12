@@ -28,8 +28,7 @@ enum {
   CONFIG_KEY_BATTERY = 16,
   CONFIG_KEY_BLUETOOTH = 17,
   CONFIG_KEY_COLORTHEME = 18,
-  CONFIG_KEY_BGCOLOR = 19,
-  CONFIG_KEY_FGCOLOR = 20
+  CONFIG_KEY_THEMECODE = 21
 };
 
 
@@ -69,9 +68,7 @@ int fullDigits = 0;
 int batteryStatus = 1;
 int bluetoothStatus = 1;
 int colorTheme = 1;
-GColor bgColor, fgColor;
-static char bgColorText[10] = "#000000";
-static char fgColorText[10] = "#ffffff";
+static char themeCodeText[20] = "ffffffffffc0";
 
 bool digitShapesChanged = false;
 
@@ -158,11 +155,7 @@ digitSlot *findSlot(Layer *layer) {
 void updateMainLayer(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
 #ifdef PBL_COLOR
-  if (colorTheme) {
-    graphics_context_set_fill_color(ctx, color[colorTheme][5]);
-  } else {
-    graphics_context_set_fill_color(ctx, bgColor);
-  }
+  graphics_context_set_fill_color(ctx, color[colorTheme][5]);
 #else
   graphics_context_set_fill_color(ctx, GColorBlack);
 #endif
@@ -226,11 +219,7 @@ void updateSlot(Layer *layer, GContext *ctx) {
       }
     }
 #ifdef PBL_COLOR
-    if (colorTheme) {
-      graphics_context_set_fill_color(ctx, color[colorTheme][(digits[slot->curDigit][t][1]%5)]);
-    } else {
-      graphics_context_set_fill_color(ctx, fgColor);
-    }
+    graphics_context_set_fill_color(ctx, color[colorTheme][(digits[slot->curDigit][t][1]%5)]);
 #else
     graphics_context_set_fill_color(ctx, GColorWhite);
 #endif
@@ -645,28 +634,36 @@ void swapDigitShapes() {
   calcDigitCorners(5);
 }
 
-int hexStringToInt(const char *hexString) {
-  if (hexString[0] == '#') {
-    hexString++;
+int hexCharToInt(const char digit) {
+  if ((digit >= '0') && (digit <= '9')) {
+    return (int)(digit - '0');
+  } else if ((digit >= 'a') && (digit <= 'f')) {
+    return 10 + (int)(digit - 'a');
+  } else if ((digit >= 'A') && (digit <= 'F')) {
+    return 10 + (int)(digit - 'A');
+  } else {
+    return -1;
   }
-
-  int l = strlen(hexString);
-  int m = 1;
-  int retVal = 0;
-  for (int c=l-1; c>=0; c--, m *= 16) {
-    char cur = hexString[c];
-    if (( cur >= '0') && (cur <= '9')) {
-      retVal += (int)(cur - '0') * m;
-    } else if (( cur >= 'a') && (cur <= 'f')) {
-      retVal += (10 + (int)(cur - 'a')) * m;
-    }
-  }
-
-  return retVal;
 }
 
-GColor setColorFromText(const char *colorText) {
-  return GColorFromHEX(hexStringToInt(colorText));
+int hexStringToByte(const char *hexString) {
+  int l = strlen(hexString);
+  if (l == 0) return 0;
+  if (l == 1) return hexCharToInt(hexString[0]);
+  
+  return 16*hexCharToInt(hexString[0]) + hexCharToInt(hexString[1]);
+}
+
+void decodeThemeCode(char *code) {
+#ifdef PBL_COLOR
+  int i;
+  
+  for (i=0; i<6; i++) {
+    color[COLOR_THEME_CUSTOM][i] = (GColor8){.argb=(uint8_t)hexStringToByte(code + 2*i)};
+  }
+#else
+  // Do nothing on APLITE
+#endif
 }
 
 void in_dropped_handler(AppMessageResult reason, void *context) {
@@ -675,9 +672,8 @@ void in_dropped_handler(AppMessageResult reason, void *context) {
 void in_received_handler(DictionaryIterator *received, void *context) {
   bool somethingChanged = false;
   bool digitShapesHaveToBeSwapped = false;
-  bool bgColorChanged = false;
-  bool fgColorChanged = false;
-
+  bool colorThemeChanged = false;
+  
   Tuple *dateorder = dict_find(received, CONFIG_KEY_DATEORDER);
   Tuple *weekday = dict_find(received, CONFIG_KEY_WEEKDAY);
   Tuple *battery = dict_find(received, CONFIG_KEY_BATTERY);
@@ -687,10 +683,9 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *corners = dict_find(received, CONFIG_KEY_ROUNDCORNERS);
   Tuple *digits = dict_find(received, CONFIG_KEY_FULLDIGITS);
   Tuple *colorThemeTuple = dict_find(received, CONFIG_KEY_COLORTHEME);
-  Tuple *bgColorTuple = dict_find(received, CONFIG_KEY_BGCOLOR);
-  Tuple *fgColorTuple = dict_find(received, CONFIG_KEY_FGCOLOR);
+  Tuple *themeCodeTuple = dict_find(received, CONFIG_KEY_THEMECODE);
 
-  if (dateorder && weekday && battery && bluetooth && lang && stripes && corners && digits && colorThemeTuple && bgColorTuple && fgColorTuple) {
+  if (dateorder && weekday && battery && bluetooth && lang && stripes && corners && digits && colorThemeTuple && themeCodeTuple) {
     somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
     somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
     somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
@@ -700,10 +695,8 @@ void in_received_handler(DictionaryIterator *received, void *context) {
 
     digitShapesChanged = false;
 
-    bgColorChanged = checkAndSaveString(bgColorText, bgColorTuple->value->cstring, CONFIG_KEY_BGCOLOR);
-    digitShapesChanged |= bgColorChanged;
-    fgColorChanged = checkAndSaveString(fgColorText, fgColorTuple->value->cstring, CONFIG_KEY_FGCOLOR);
-    digitShapesChanged |= fgColorChanged;
+    colorThemeChanged = checkAndSaveString(themeCodeText, themeCodeTuple->value->cstring, CONFIG_KEY_THEMECODE);
+    digitShapesChanged |= colorThemeChanged;
 
     digitShapesChanged |= checkAndSaveInt(&stripedDigits, stripes->value->int32, CONFIG_KEY_STRIPES);
     digitShapesChanged |= checkAndSaveInt(&roundCorners, corners->value->int32, CONFIG_KEY_ROUNDCORNERS);
@@ -717,14 +710,10 @@ void in_received_handler(DictionaryIterator *received, void *context) {
             USDate, showWeekday, batteryStatus, bluetoothStatus, curLang);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
             stripedDigits, roundCorners, fullDigits, colorTheme);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  bgColor=%s, fgColor=%s", bgColorText, fgColorText);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  themeCodeText=%s", themeCodeText);
 
-    if (bgColorChanged) {
-      bgColor = setColorFromText(bgColorText);
-    }
-
-    if (fgColorChanged) {
-      fgColor = setColorFromText(fgColorText);
+    if (colorThemeChanged) {
+      decodeThemeCode(themeCodeText);
     }
 
     if (digitShapesHaveToBeSwapped) {
@@ -806,28 +795,21 @@ void readConfig() {
     persist_write_int(CONFIG_KEY_COLORTHEME, colorTheme);
   }
 
-  if (persist_exists(CONFIG_KEY_BGCOLOR)) {
-    persist_read_string(CONFIG_KEY_BGCOLOR, bgColorText, sizeof(bgColorText));
+  if (persist_exists(CONFIG_KEY_THEMECODE)) {
+    persist_read_string(CONFIG_KEY_THEMECODE, themeCodeText, sizeof(themeCodeText));
   } else {
-    strcpy(bgColorText, "#000000");
-    persist_write_string(CONFIG_KEY_BGCOLOR, bgColorText);
+    strcpy(themeCodeText, "ffffffffffc0");
+    persist_write_string(CONFIG_KEY_THEMECODE, themeCodeText);
   }
-  bgColor = setColorFromText(bgColorText);
-
-  if (persist_exists(CONFIG_KEY_FGCOLOR)) {
-    persist_read_string(CONFIG_KEY_FGCOLOR, fgColorText, sizeof(fgColorText));
-  } else {
-    strcpy(fgColorText, "#ffffff");
-    persist_write_string(CONFIG_KEY_FGCOLOR, fgColorText);
-  }
-  fgColor = setColorFromText(fgColorText);
+  
+  decodeThemeCode(themeCodeText);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Stored config :");
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d",
           USDate, showWeekday, batteryStatus, bluetoothStatus);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  lang=%d, stripedDigits=%d, roundCorners=%d, fullDigits=%d",
           curLang, stripedDigits, roundCorners, fullDigits);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, bgcolor=%s, fgColor=%s", colorTheme, bgColorText, fgColorText);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s", colorTheme, themeCodeText);
 }
 
 static void app_message_init(void) {
@@ -894,8 +876,6 @@ void handle_deinit() {
     app_timer_cancel(timer);
     timer=NULL;
   }
-
-  //destroyAnim(anim);
 
   bluetooth_connection_service_unsubscribe();
   accel_tap_service_unsubscribe();

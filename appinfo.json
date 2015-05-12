@@ -4,7 +4,7 @@
   "longName": "Blockslide",
   "companyName": "Jnm",
   "versionCode": 1,
-  "versionLabel": "3.3",
+  "versionLabel": "3.4",
   "watchapp": {
     "watchface": true
   },
@@ -21,8 +21,7 @@
     "battery": 16,
     "bluetooth": 17,
     "colortheme": 18,
-    "bgcolor": 19,
-    "fgcolor": 20
+    "themecode": 21
   },
   "resources": {
     "media": [
