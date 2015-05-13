@@ -236,6 +236,12 @@
     $colorCapable = 0;
   }
 
+  if (($colorCapable == "true") || ($colorCapable == 1)) {
+    $colorCapable = 1;
+  } else {
+    $colorCapable = 0;
+  }
+ 
   $showDiv = "";
 
   if (!$colorCapable) {

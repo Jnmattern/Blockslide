@@ -6,7 +6,6 @@ enum {
   COLOR_THEME_AQUAMARINE,
   COLOR_THEME_CANDY,
   COLOR_THEME_EARTH_AND_SKY,
-  //COLOR_THEME_CAMOUFLAGE,
   COLOR_THEME_MAX
 };
 
@@ -52,13 +51,6 @@ void initColors() {
   color[COLOR_THEME_EARTH_AND_SKY][3] = GColorRajah;
   color[COLOR_THEME_EARTH_AND_SKY][4] = GColorWindsorTan;
   color[COLOR_THEME_EARTH_AND_SKY][5] = GColorBlack;
-
-  // Camouflage
-  //color[COLOR_THEME_CAMOUFLAGE][0] = GColorDarkGreen;
-  //color[COLOR_THEME_CAMOUFLAGE][1] = GColorBulgarianRose;
-  //color[COLOR_THEME_CAMOUFLAGE][2] = GColorArmyGreen;
-  //color[COLOR_THEME_CAMOUFLAGE][3] = GColorDarkGray;
-  //color[COLOR_THEME_CAMOUFLAGE][4] = GColorArmyGreen;
 }
 #else
 // Pebble B/W

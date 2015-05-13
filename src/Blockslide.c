@@ -1,5 +1,9 @@
 #include <pebble.h>
 
+// Watchapp version retrieval
+#include "pebble_process_info.h"
+extern const LegacyPebbleAppInfo __pbl_app_info;
+
 #include "Blockslide.h"
 #include "Blockslide-Color-Themes.h"
 
@@ -94,12 +98,12 @@ int startDigit[NUMSLOTS] = {
   SPACE_L,
   SPACE_R,
   SPACE_D,
-  'B'-'0',
-  'L'-'0',
-  'K'-'0',
-  'S'-'0',
-  'L'-'0',
-  'D'-'0',
+  SPACE_D,
+  SPACE_D,
+  SPACE_D,
+  SPACE_D,
+  SPACE_D,
+  SPACE_D,
   SPACE_D
 };
 
@@ -826,8 +830,29 @@ void initDigitCorners() {
   }
 }
 
+void initSplash() {
+  char vers[10];
+  int len, s, i;
+
+  snprintf(vers, sizeof(vers), "V%d.%d", __pbl_app_info.process_version.major, __pbl_app_info.process_version.minor);
+  len = strlen(vers);
+  s = (8 - len)/2;
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Blockslide %s", vers);
+
+  for (i=0; i<len; i++) {
+    if ((vers[i] >= '0') && (vers[i] <= 'Z')) {
+      startDigit[4+s+i] = vers[i] - '0';
+    } else if (vers[i] == '.') {
+      startDigit[4+s+i] = DOT;
+    }
+  }
+}
+
 void handle_init() {
   int i;
+
+  initSplash();
 
   window = window_create();
   window_set_background_color(window, GColorBlack);

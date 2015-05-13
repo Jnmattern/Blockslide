@@ -76,7 +76,7 @@ function logVariables(msg) {
 }
 
 function isWatchColorCapable() {
-  return (Pebble.getActiveWatchInfo && Pebble.getActiveWatchInfo().platform!='aplite');
+  return ((typeof Pebble.getActiveWatchInfo === "function") && Pebble.getActiveWatchInfo().platform!='aplite');
 }
 
 Pebble.addEventListener("ready", function() {
