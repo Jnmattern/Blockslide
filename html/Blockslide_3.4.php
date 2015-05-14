@@ -326,7 +326,7 @@
       <input type="text" id="themecode" name="themecode" data-clear-btn="true">
     </div>
     <div class="ui-block-b">
-      <input id="parseTheme" type="button" data-theme="b" data-icon="check" data-iconpos="left" value="Use Code" data-mini="true">
+      <input id="parseTheme" type="button" data-theme="a" data-icon="edit" data-iconpos="left" value="Use Code" data-mini="true">
     </div>
   </div>
 
@@ -378,6 +378,11 @@
 
   function decodeTheme(themeString) {
     themeString = themeString.toLowerCase();
+
+    if (themeString == "undefined") {
+      themeString = "f4e2f0cccbfc";
+    }
+
     var len = themeString.length;
     if (len != 12) {
       alert("Invalid Theme Code: must be 12 characters long.")
@@ -550,6 +555,9 @@
           decodeTheme($("#themecode").val());
           setColors();
           setColorPickers();
+
+          $("input:radio[name=colortheme][value=0]").trigger('click');
+          $("input:radio[name=colortheme]").checkboxradio("refresh");
         });
 
         $('.sp-replacer').unwrap();
