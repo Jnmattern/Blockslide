@@ -80,8 +80,8 @@ function isWatchColorCapable() {
 }
 
 Pebble.addEventListener("ready", function() {
-  logVariables("Ready Event");
   readConfig();
+  logVariables("Ready Event");
 	Pebble.sendAppMessage(JSON.parse('{"dateorder":'+dateorder+',"weekday":'+weekday+',"battery":'+battery+',"bluetooth":'+bluetooth+',"lang":'+lang+',"stripes":'+stripes+',"roundcorners":'+roundcorners+',"fulldigits":'+fulldigits+',"colortheme":'+colortheme+',"themecode":"'+themecode+'"}'));
 });
 

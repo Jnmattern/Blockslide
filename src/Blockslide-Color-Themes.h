@@ -22,8 +22,8 @@ void initColors() {
 
   // Sunset
   color[COLOR_THEME_SUNSET][0] = GColorPastelYellow;
-  color[COLOR_THEME_SUNSET][1] = GColorIcterine;
-  color[COLOR_THEME_SUNSET][2] = GColorRajah;
+  color[COLOR_THEME_SUNSET][1] = GColorYellow;
+  color[COLOR_THEME_SUNSET][2] = GColorChromeYellow;
   color[COLOR_THEME_SUNSET][3] = GColorOrange;
   color[COLOR_THEME_SUNSET][4] = GColorRed;
   color[COLOR_THEME_SUNSET][5] = GColorBlack;
@@ -48,7 +48,7 @@ void initColors() {
   color[COLOR_THEME_EARTH_AND_SKY][0] = GColorVividCerulean;
   color[COLOR_THEME_EARTH_AND_SKY][1] = GColorCyan;
   color[COLOR_THEME_EARTH_AND_SKY][2] = GColorPastelYellow;
-  color[COLOR_THEME_EARTH_AND_SKY][3] = GColorRajah;
+  color[COLOR_THEME_EARTH_AND_SKY][3] = GColorChromeYellow;
   color[COLOR_THEME_EARTH_AND_SKY][4] = GColorWindsorTan;
   color[COLOR_THEME_EARTH_AND_SKY][5] = GColorBlack;
 }

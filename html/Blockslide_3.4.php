@@ -377,15 +377,19 @@
   }
 
   function decodeTheme(themeString) {
+    var fallbackTheme = "f4e2f0cccbfc";
+    var validCode = true;
+
     themeString = themeString.toLowerCase();
 
     if (themeString == "undefined") {
-      themeString = "f4e2f0cccbfc";
+      themeString = fallbackTheme;
     }
 
     var len = themeString.length;
     if (len != 12) {
-      alert("Invalid Theme Code: must be 12 characters long.")
+      alert("Invalid Theme Code: must be 12 characters long.");
+      validCode = false;
     }
 
     invalidChars = false;
@@ -397,14 +401,16 @@
       }
     }
 
-    if (invalidChars) {
+    if (invalidChars && validCode) {
       alert("Invalid Theme Code: must only contain chars from 0 to 9 or a to f");
     }
 
-    for (i=0; i<5; i++) {
-      curFGColor[i] = color2to24bit(themeString.substr(2*i, 2));
+    if (validCode) {
+      for (i=0; i<5; i++) {
+        curFGColor[i] = color2to24bit(themeString.substr(2*i, 2));
+      }
+      curBGColor = color2to24bit(themeString.substr(10, 2));
     }
-    curBGColor = color2to24bit(themeString.substr(10, 2));
   }
 
   function color24to2bit(color) {
