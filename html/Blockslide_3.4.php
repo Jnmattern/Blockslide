@@ -361,8 +361,8 @@
     [ 'fa0', 'fa5', 'faa', 'faf', 'ff0', 'ff5', 'ffa', 'fff' ]
   ];
 
-  function color2to24bit(color2bit) {
-    var c = parseInt(color2bit, 16) - 192;
+  function color8to24bit(color8bit) {
+    var c = parseInt(color8bit, 16) - 192;
     var r = 0x55 * ((c & 0x30) >> 4);
     var g = 0x55 * ((c & 0xc) >> 2);
     var b = 0x55 * (c & 0x3);
@@ -407,13 +407,13 @@
 
     if (validCode) {
       for (i=0; i<5; i++) {
-        curFGColor[i] = color2to24bit(themeString.substr(2*i, 2));
+        curFGColor[i] = color8to24bit(themeString.substr(2*i, 2));
       }
-      curBGColor = color2to24bit(themeString.substr(10, 2));
+      curBGColor = color8to24bit(themeString.substr(10, 2));
     }
   }
 
-  function color24to2bit(color) {
+  function color24to8bit(color) {
     var r = parseInt(color.substr(1, 2), 16) >> 6;
     var g = parseInt(color.substr(3, 2), 16) >> 6;
     var b = parseInt(color.substr(5, 2), 16) >> 6;
@@ -425,9 +425,9 @@
   function encodeColors() {
     encodedTheme = "";
     for (i=0; i<5; i++) {
-      encodedTheme += color24to2bit(curFGColor[i]);
+      encodedTheme += color24to8bit(curFGColor[i]);
     }
-    encodedTheme += color24to2bit(curBGColor);
+    encodedTheme += color24to8bit(curBGColor);
   }
 
   function setColors() {
@@ -445,131 +445,134 @@
     $('#themecode').val(encodedTheme);
   }
 
-      function setBGColor(color) {
-        curBGColor = color.toHexString();
-        setColors();
-      }
+  function selectCustomTheme() {
+    $("input:radio[name=colortheme][value=0]").trigger('click');
+    $("input:radio[name=colortheme]").checkboxradio("refresh");
+  }
 
-      function setFGColor(i, color) {
-        curFGColor[i] = color.toHexString();
-        setColors();
-      }
+  function setBGColor(color) {
+    curBGColor = color.toHexString();
+    setColors();
+  }
 
-      function setColorPickers() {
-        $("#bgcolorpicker").spectrum("set", curBGColor);
+  function setFGColor(i, color) {
+    curFGColor[i] = color.toHexString();
+    setColors();
+  }
 
-        for (i=0; i<5; i++) {
-          $("#fgcolorpicker"+i).spectrum("set", curFGColor[i]);
-        }
-      }
+  function setColorPickers() {
+    $("#bgcolorpicker").spectrum("set", curBGColor);
 
-      function saveOptions() {
-        var options = {
-          'dateorder': parseInt($("input[name=dateorder]:checked").val(), 10),
-          'weekday': parseInt($("input[name=weekday]:checked").val(), 10),
-          'battery': parseInt($("input[name=battery]:checked").val(), 10),
-          'bluetooth': parseInt($("input[name=bluetooth]:checked").val(), 10),
-          'lang': parseInt($("#lang").val(), 10),
-          'stripes': parseInt($("input[name=stripes]:checked").val(), 10),
-          'roundcorners': parseInt($("input[name=roundcorners]:checked").val(), 10),
-          'fulldigits': parseInt($("input[name=fulldigits]:checked").val(), 10),
-          'colortheme': parseInt($("input[name=colortheme]:checked").val(), 10),
-          'themecode': $("#themecode").val()
-        }
-        return options;
-      }
+    for (i=0; i<5; i++) {
+      $("#fgcolorpicker"+i).spectrum("set", curFGColor[i]);
+    }
+  }
 
-      $().ready(function() {
+  function saveOptions() {
+    var options = {
+      'dateorder': parseInt($("input[name=dateorder]:checked").val(), 10),
+      'weekday': parseInt($("input[name=weekday]:checked").val(), 10),
+      'battery': parseInt($("input[name=battery]:checked").val(), 10),
+      'bluetooth': parseInt($("input[name=bluetooth]:checked").val(), 10),
+      'lang': parseInt($("#lang").val(), 10),
+      'stripes': parseInt($("input[name=stripes]:checked").val(), 10),
+      'roundcorners': parseInt($("input[name=roundcorners]:checked").val(), 10),
+      'fulldigits': parseInt($("input[name=fulldigits]:checked").val(), 10),
+      'colortheme': parseInt($("input[name=colortheme]:checked").val(), 10),
+      'themecode': $("#themecode").val()
+    }
+    return options;
+  }
 
-        decodeTheme(passedTheme);
+  $().ready(function() {
 
-        $("#bgcolorpicker").spectrum({
-            color: curBGColor,
-            showPaletteOnly: true,
-            hideAfterPaletteSelect:true,
-            change: function(color) {
-              setBGColor(color);
-            },
-            palette: pebblePalette
-          });
+    decodeTheme(passedTheme);
 
-        $("#fgcolorpicker0").spectrum({
-            color: curFGColor[0],
-            showPaletteOnly: true,
-            hideAfterPaletteSelect:true,
-            change: function(color) {
-              setFGColor(0, color);
-            },
-            palette: pebblePalette
-        });
-
-        $("#fgcolorpicker1").spectrum({
-            color: curFGColor[1],
-            showPaletteOnly: true,
-            hideAfterPaletteSelect:true,
-            change: function(color) {
-              setFGColor(1, color);
-            },
-            palette: pebblePalette
-        });
-
-        $("#fgcolorpicker2").spectrum({
-            color: curFGColor[2],
-            showPaletteOnly: true,
-            hideAfterPaletteSelect:true,
-            change: function(color) {
-              setFGColor(2, color);
-            },
-            palette: pebblePalette
-        });
-
-        $("#fgcolorpicker3").spectrum({
-            color: curFGColor[3],
-            showPaletteOnly: true,
-            hideAfterPaletteSelect:true,
-            change: function(color) {
-              setFGColor(3, color);
-            },
-            palette: pebblePalette
-        });
-
-        $("#fgcolorpicker4").spectrum({
-            color: curFGColor[4],
-            showPaletteOnly: true,
-            hideAfterPaletteSelect:true,
-            change: function(color) {
-              setFGColor(4, color);
-            },
-            palette: pebblePalette
-        });
-
-        $("#cancel").click(function() {
-          console.log("Cancel");
-          document.location = closeURL;
-        });
-
-        $("#save").click(function() {
-          console.log("Submit");
-          
-          var location = closeURL + encodeURIComponent(JSON.stringify(saveOptions()));
-          console.log("Close: " + location);
-          console.log(location);
-          document.location = location;
-        });
-
-        $("#parseTheme").click(function() {
-          decodeTheme($("#themecode").val());
-          setColors();
-          setColorPickers();
-
-          $("input:radio[name=colortheme][value=0]").trigger('click');
-          $("input:radio[name=colortheme]").checkboxradio("refresh");
-        });
-
-        $('.sp-replacer').unwrap();
-
-        setColors();
+    $("#bgcolorpicker").spectrum({
+        color: curBGColor,
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setBGColor(color);
+        },
+        palette: pebblePalette
       });
-    </script>
+
+    $("#fgcolorpicker0").spectrum({
+        color: curFGColor[0],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(0, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#fgcolorpicker1").spectrum({
+        color: curFGColor[1],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(1, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#fgcolorpicker2").spectrum({
+        color: curFGColor[2],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(2, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#fgcolorpicker3").spectrum({
+        color: curFGColor[3],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(3, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#fgcolorpicker4").spectrum({
+        color: curFGColor[4],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(4, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#cancel").click(function() {
+      console.log("Cancel");
+      document.location = closeURL;
+    });
+
+    $("#save").click(function() {
+      console.log("Submit");
+      
+      var location = closeURL + encodeURIComponent(JSON.stringify(saveOptions()));
+      console.log("Close: " + location);
+      console.log(location);
+      document.location = location;
+    });
+
+    $("#parseTheme").click(function() {
+      decodeTheme($("#themecode").val());
+      setColors();
+      setColorPickers();
+      selectCustomTheme();
+    });
+
+    $('.sp-replacer').unwrap();
+
+    setColors();
+  });
+  </script>
 </body>
 </html>
