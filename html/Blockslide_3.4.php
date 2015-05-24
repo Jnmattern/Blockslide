@@ -251,77 +251,75 @@
 
 <?php
     echo "<div id=\"colortheme\" data-role=\"fieldcontain\"" . $showDiv . ">\n";
-?>
-        <fieldset data-role="controlgroup" data-type="horizontal">
-          <legend>Color Theme</legend>
 
-<?php
-	if (isset($_GET['colortheme'])) {
-		$colortheme = $_GET['colortheme'];
-	} else {
-		$colortheme = 0;
-	}
-
-  for ($i=0; $i<5; $i++) {
-    $s = "";
-    if ($i == $colortheme) {
-      $s = " checked";
-    }
-    echo '<input id="colortheme' . $i . '" name="colortheme" value="' . $i . '" data-theme="" type="radio"' . $s . '><label for="colortheme' . $i . '">';
-
-    if ($i > 0) {
-      echo '<img id="img_' . $i . '" src="theme_' . $i . '.png" width="45" height="44"><br/>';
+    if (isset($_GET['colortheme'])) {
+      $colortheme = $_GET['colortheme'];
     } else {
-?>
-    <div style="width: 45px; background-color: black; height: 44px; padding: 1px;" id="img_0">
-      <div id="line_0" style="width: 43px; background-color: white; height: 8px; border-top-left-radius: 5px; border-top-right-radius: 5px; margin: 0px 1px 0px 1px;"></div>
-      <div id="line_1" style="width: 43px; background-color: white; height: 7px; margin: 1px 1px 0px 1px; float: left;">
-        <div id="line_12" style="width: 13px; background-color: black; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>
-      </div>
-      <div id="line_2" style="width: 43px; background-color: white; height: 7px; margin: 1px 1px 0px 1px; float: left;">
-        <div id="line_22" style="width: 13px; background-color: black; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>
-      </div>
-      <div id="line_3" style="width: 43px; background-color: white; height: 7px; margin: 1px; float: left;">
-        <div id="line_32" style="width: 13px; background-color: black; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>
-      </div>
-      <div id="line_4" style="width: 43px; background-color: white; height: 8px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; clear: both; margin: 1px 1px 0px 1px;"></div>
-    </div>
-<?php
+      $colortheme = 0;
     }
-
-    echo '</label>';
-  }
 ?>
-        </fieldset>
-      </div>
 
+<div id="colorthemeaccordion" data-role="collapsible-set" data-theme="b" data-content-theme="b" data-icon-pos="left" data-inset="false">
+    <div id="predefinedcolorthemes" data-role="collapsible">
+      <h3>Predefined Color Themes</h3>
+      <fieldset data-role="controlgroup" data-type="vertical">
 <?php
-  echo "<div id=\"colorpickerdiv\" data-role=\"fieldcontain\"" . $showDiv . ">\n";
-  ?>
-    <div class="ui-grid-a">
-      <div class="ui-block-a">
-        <fieldset data-role="controlgroup">
-          <legend>Background Color</legend>
-            <input id="bgcolorpicker" name="bgcolorpicker">
-        </fieldset>
-      </div>
-      <div class="ui-block-b">
-        <fieldset data-role="controlgroup">
-          <legend>Digits Colors</legend>
-            <input id="fgcolorpicker0" name="fgcolorpicker0">
-            <input id="fgcolorpicker1" name="fgcolorpicker1">
-            <input id="fgcolorpicker2" name="fgcolorpicker2">
-            <input id="fgcolorpicker3" name="fgcolorpicker3">
-            <input id="fgcolorpicker4" name="fgcolorpicker4">
-        </fieldset>
-      </div>
+        for ($i=1; $i<5; $i++) {
+          $s = "";
+          if ($i == $colortheme) {
+            $s = " checked";
+          }
+          echo '<input id="colortheme' . $i . '" name="colortheme" value="' . $i . '" data-theme="a" type="radio"' . $s . '><label for="colortheme' . $i . '">';
+
+          echo '<img id="img_' . $i . '" src="theme_' . $i . '.png" width="45" height="44"><br/>';
+          echo '</label>';
+        }
+?>
+      </fieldset>
     </div>
-  </div>
+    <div id="customcolortheme" data-role="collapsible" data-theme="a">
+        <h3>Custom Color Theme</h3>
 
 <?php
-  echo "<div id=\"themecodediv\" data-role=\"fieldcontain\"" . $showDiv . ">\n";
+  $s = "";
+  if ($colortheme == 0) {
+    $s = " checked";
+  }
+  echo '<input id="colortheme0" name="colortheme" value="0" type="radio"' . $s . '><label for="colortheme0">';
 ?>
+      <div style="width: 45px; background-color: black; height: 44px; padding: 1px;" id="img_0">
+        <div id="line_0" style="width: 43px; background-color: white; height: 8px; border-top-left-radius: 5px; border-top-right-radius: 5px; margin: 0px 1px 0px 1px;"></div>
+        <div id="line_1" style="width: 43px; background-color: white; height: 7px; margin: 1px 1px 0px 1px; float: left;">
+          <div id="line_12" style="width: 13px; background-color: black; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>
+        </div>
+        <div id="line_2" style="width: 43px; background-color: white; height: 7px; margin: 1px 1px 0px 1px; float: left;">
+          <div id="line_22" style="width: 13px; background-color: black; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>
+        </div>
+        <div id="line_3" style="width: 43px; background-color: white; height: 7px; margin: 1px; float: left;">
+          <div id="line_32" style="width: 13px; background-color: black; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>
+        </div>
+        <div id="line_4" style="width: 43px; background-color: white; height: 8px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; clear: both; margin: 1px 1px 0px 1px;"></div>
+      </div>
+    </label>
   <div class="ui-grid-a">
+    <div class="ui-block-a">
+      <legend>Background</legend>
+    </div>
+    <div class="ui-block-b">
+      <input id="bgcolorpicker" name="bgcolorpicker">
+    </div>
+    <div class="ui-block-a">
+      <legend>Digits Lines</legend>
+    </div>
+    <div class="ui-block-b">
+      <fieldset data-role="controlgroup" data-type="vertical">
+        <input id="fgcolorpicker0" name="fgcolorpicker0">
+        <input id="fgcolorpicker1" name="fgcolorpicker1">
+        <input id="fgcolorpicker2" name="fgcolorpicker2">
+        <input id="fgcolorpicker3" name="fgcolorpicker3">
+        <input id="fgcolorpicker4" name="fgcolorpicker4">
+      </fieldset>
+    </div>
     <div class="ui-block-a">
       <input type="text" id="themecode" name="themecode" data-clear-btn="true">
     </div>
@@ -329,6 +327,12 @@
       <input id="parseTheme" type="button" data-theme="a" data-icon="edit" data-iconpos="left" value="Use Code" data-mini="true">
     </div>
   </div>
+
+
+    </div>
+</div>
+
+      </div>
 
 
   <script>
@@ -345,6 +349,7 @@
     echo "var passedTheme = \"ffffffffffc0\";\n";
   }
 
+  echo "var colorThemeAtStart = " . $colortheme . ";\n";
   echo "var curBGColor = \"#000000\";\n";
   echo "var curFGColor = [ \"#ffffff\", \"#ffffff\", \"#ffffff\", \"#ffffff\", \"#ffffff\" ];\n";
 ?>
@@ -379,6 +384,7 @@
   function decodeTheme(themeString) {
     var fallbackTheme = "f4e2f0cccbfc";
     var validCode = true;
+    var i = 0;
 
     themeString = themeString.toLowerCase();
 
@@ -423,7 +429,9 @@
   }
 
   function encodeColors() {
+    var i = 0;
     encodedTheme = "";
+
     for (i=0; i<5; i++) {
       encodedTheme += color24to8bit(curFGColor[i]);
     }
@@ -431,6 +439,7 @@
   }
 
   function setColors() {
+    var i = 0;
     document.getElementById("img_0").style.backgroundColor = curBGColor;
     document.getElementById("line_12").style.backgroundColor = curBGColor;
     document.getElementById("line_22").style.backgroundColor = curBGColor;
@@ -453,14 +462,19 @@
   function setBGColor(color) {
     curBGColor = color.toHexString();
     setColors();
+    selectCustomTheme();
+    setColorPickers();
   }
 
   function setFGColor(i, color) {
     curFGColor[i] = color.toHexString();
     setColors();
+    selectCustomTheme();
+    setColorPickers();
   }
 
   function setColorPickers() {
+    var i = 0;
     $("#bgcolorpicker").spectrum("set", curBGColor);
 
     for (i=0; i<5; i++) {
@@ -572,6 +586,12 @@
     $('.sp-replacer').unwrap();
 
     setColors();
+
+    if (colorThemeAtStart == 0) {
+      $( "#customcolortheme").trigger( "expand" );
+    } else {
+      $( "#predefinedcolorthemes").trigger( "expand" );
+    }
   });
   </script>
 </body>
