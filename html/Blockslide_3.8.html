@@ -10,6 +10,7 @@
 
                 <link rel="stylesheet" type="text/css" href="../spectrum.css">
                 <script type='text/javascript' src="../spectrum.js"></script>
+                <script type='text/javascript' src="../argsparse.js"></script>
 
                 <style>
                         .ui-header .ui-title { margin-left: 1em; margin-right: 1em; text-overflow: clip; }
@@ -36,24 +37,18 @@
     <div id="dateorder" data-role="fieldcontain" class="ui-bar">
 			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Date format</legend>
-<?php
-	if (!isset($_GET['dateorder'])) {
-		$dateorder = 1;
-	} else {
-		$dateorder = $_GET['dateorder'];
-	}
-	
-	if ($dateorder == 0) {
-		$s1 = " checked";
-		$s2 = "";
-	} else {
-		$s1 = "";
-		$s2 = " checked";
-	}
-	
-	echo '<input id="format1" name="dateorder" value="0" data-theme="" type="radio"' . $s1 . '><label for="format1">dd mm</label>';
-	echo '<input id="format2" name="dateorder" value="1" data-theme="" type="radio"' . $s2 . '><label for="format2">mm dd</label>';
-?>
+<script>
+  var s;
+  if (typeof (args.dateorder) == "undefined") {
+    args.dateorder = 1;
+  }
+
+  s = [ "", "" ];
+  s[args.dateorder] = " checked";
+
+  document.writeln('<input id="format1" name="dateorder" value="0" data-theme="" type="radio"' + s[0] + '><label for="format1">dd mm</label>');
+  document.writeln('<input id="format2" name="dateorder" value="1" data-theme="" type="radio"' + s[1] + '><label for="format2">mm dd</label>');
+</script>
 			</fieldset>
 		</div>
   </div>
@@ -61,24 +56,17 @@
     <div data-role="fieldcontain" class="ui-bar">
           <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
             <legend>Show day of week</legend>
-<?php
-	if (!isset($_GET['weekday'])) {
-		$weekday = 0;
-	} else {
-		$weekday = $_GET['weekday'];
-	}
-	
-	if ($weekday == 0) {
-		$s1 = " checked";
-		$s2 = "";
-	} else {
-		$s1 = "";
-		$s2 = " checked";
-	}
+<script>
+  if (typeof (args.weekday) == "undefined") {
+    args.weekday = 0;
+  }
 
-	echo '<input id="weekday1" name="weekday" value="0" data-theme="" type="radio"' . $s1 . '><label for="weekday1">Off</label>';
-	echo '<input id="weekday2" name="weekday" value="1" data-theme="" type="radio"' . $s2 . '><label for="weekday2">On</label>';
-?>
+  s = [ "", "" ];
+  s[args.weekday] = " checked";
+
+	document.writeln('<input id="weekday1" name="weekday" value="0" data-theme="" type="radio"' + s[0] + '><label for="weekday1">Off</label>');
+	document.writeln('<input id="weekday2" name="weekday" value="1" data-theme="" type="radio"' + s[1] + '><label for="weekday2">On</label>');
+</script>
         </fieldset>
         </div>
   </div>
@@ -86,24 +74,17 @@
     <div id="battery" data-role="fieldcontain" class="ui-bar">
 			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Tap to show battery</legend>
-<?php
-	if (!isset($_GET['battery'])) {
-		$battery = 1;
-	} else {
-		$battery = $_GET['battery'];
-	}
-	
-	if ($battery == 0) {
-		$s1 = " checked";
-		$s2 = "";
-	} else {
-		$s1 = "";
-		$s2 = " checked";
-	}
-	
-	echo '<input id="battery1" name="battery" value="0" data-theme="" type="radio"' . $s1 . '><label for="battery1">Off</label>';
-	echo '<input id="battery2" name="battery" value="1" data-theme="" type="radio"' . $s2 . '><label for="battery2">On</label>';
-?>
+<script>
+  if (typeof (args.battery) == "undefined") {
+    args.battery = 1;
+  }
+
+  s = [ "", "" ];
+  s[args.battery] = " checked";
+
+  document.writeln('<input id="battery1" name="battery" value="0" data-theme="" type="radio"' + s[0] + '><label for="battery1">Off</label>');
+	document.writeln('<input id="battery2" name="battery" value="1" data-theme="" type="radio"' + s[1] + '><label for="battery2">On</label>');
+</script>
 			</fieldset>
 		</div>
   </div>
@@ -111,24 +92,17 @@
     <div id="bluetooth" data-role="fieldcontain" class="ui-bar">
       <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Vibrate on BT disconnect</legend>
-<?php
-	if (!isset($_GET['bluetooth'])) {
-		$bluetooth = 1;
-	} else {
-		$bluetooth = $_GET['bluetooth'];
-	}
-	
-	if ($bluetooth == 0) {
-		$s1 = " checked";
-		$s2 = "";
-	} else {
-		$s1 = "";
-		$s2 = " checked";
-	}
+<script>
+  if (typeof (args.bluetooth) == "undefined") {
+    args.bluetooth = 1;
+  }
 
-	echo '<input id="bluetooth1" name="bluetooth" value="0" data-theme="" type="radio"' . $s1 . '><label for="bluetooth1">Off</label>';
-	echo '<input id="bluetooth2" name="bluetooth" value="1" data-theme="" type="radio"' . $s2 . '><label for="bluetooth2">On</label>';
-?>
+  s = [ "", "" ];
+  s[args.bluetooth] = " checked";
+
+	document.writeln('<input id="bluetooth1" name="bluetooth" value="0" data-theme="" type="radio"' + s[0] + '><label for="bluetooth1">Off</label>');
+	document.writeln('<input id="bluetooth2" name="bluetooth" value="1" data-theme="" type="radio"' + s[1] + '><label for="bluetooth2">On</label>');
+</script>
         </fieldset>
         </div>
   </div>
@@ -140,71 +114,65 @@
 				Language
 			</label>
 			<select id="lang" data-native-menu="true" name="lang">
-<?php
-	$langs = array(
-		0 => 'Dutch',
-		1 => 'English',
-		2 => 'French',
-		3 => 'German',
-		5 => 'Italian',
-		4 => 'Spanish'
-	);
-	
-	if (!isset($_GET['lang'])) {
-		$lang = 1;
-	} else {
-		$lang = $_GET['lang'];
-	}
-	
-	foreach ($langs as $v => $n) {
-		if ($lang == $v) {
-			$s = " selected";
-		} else {
-			$s = "";
-		}
-		echo '<option value="' . $v . '" ' . $s . '>' . $n . '</option>';
-	}
-	?>
+<script>
+  var langs = [
+    [ 0, 'Dutch' ],
+    [ 1, 'English' ],
+    [ 2, 'French' ],
+    [ 3, 'German' ],
+    [ 5, 'Italian' ],
+    [ 4, 'Spanish' ]
+  ];
+
+  if (typeof (args.lang) == "undefined") {
+    args.lang = 1;
+  }
+
+  var i, c;
+  for (i=0; i<langs.length; i++) {
+    if (args.lang == langs[i][0]) {
+      c = " selected";
+    } else {
+      c = "";
+    }
+    document.writeln('<option value="' + langs[i][0] + '" ' + c + '>' + langs[i][1] + '</option>');
+  }
+</script>
 			</select>
 		</div>
 
       <div id="stripes" data-role="fieldcontain">
         <fieldset data-role="controlgroup" data-type="horizontal">
           <legend>Stripes</legend>
+<script>
+  if (typeof (args.stripes) == "undefined") {
+    args.stripes = 1;
+  }
 
-<?php
-	if (!isset($_GET['stripes'])) {
-		$stripes = 1;
-	} else {
-		$stripes = $_GET['stripes'];
-	}
+  s = [ "", "" ];
+  s[args.stripes] = " checked";
 
-	$s = array( "", "");
-	$s[$stripes] = " checked";
-
-	echo '<input id="stripes1" name="stripes" value="0" data-theme="" type="radio"' . $s[0] . '><label for="stripes1"><img src="digitsPlain.png" width="72" height="72"><br/>Plain</label>';
-	echo '<input id="stripes2" name="stripes" value="1" data-theme="" type="radio"' . $s[1] . '><label for="stripes2"><img src="digits1.png" width="72" height="72"><br/>Striped</label>';
-?>
+  document.writeln('<input id="stripes1" name="stripes" value="0" data-theme="" type="radio"' + s[0] + '><label for="stripes1"><img src="digitsPlain.png" width="72" height="72"><br/>Plain</label>');
+  document.writeln('<input id="stripes2" name="stripes" value="1" data-theme="" type="radio"' + s[1] + '><label for="stripes2"><img src="digits1.png" width="72" height="72"><br/>Striped</label>');
+</script>
         </fieldset>
       </div>
 
       <div id="roundcorners" data-role="fieldcontain">
         <fieldset data-role="controlgroup" data-type="horizontal">
           <legend>Corners</legend>
+<script>
+  if (typeof (args.roundcorners) == "undefined") {
+    args.roundcorners = 1;
+  }
 
-<?php
-	if (!isset($_GET['roundcorners'])) {
-		$roundcorners = 1;
-	} else {
-		$roundcorners = $_GET['roundcorners'];
-	}
+  s = [ "", "" ];
+  s[args.roundcorners] = " checked";
 
-	$s = array( "", "");
-	$s[$roundcorners] = " checked";
+  document.writeln('<input id="corners1" name="roundcorners" value="0" data-theme="" type="radio"' + s[0] + '><label for="corners1"><img src="digitsFlatCorners.png" width="72" height="72"><br/>Flat</label>');
+  document.writeln('<input id="corners2" name="roundcorners" value="1" data-theme="" type="radio"' + s[1] + '><label for="corners2"><img src="digitsRoundCorners.png" width="72" height="72"><br/>Round</label>');
 
-	echo '<input id="corners1" name="roundcorners" value="0" data-theme="" type="radio"' . $s[0] . '><label for="corners1"><img src="digitsFlatCorners.png" width="72" height="72"><br/>Flat</label>';
-	echo '<input id="corners2" name="roundcorners" value="1" data-theme="" type="radio"' . $s[1] . '><label for="corners2"><img src="digitsRoundCorners.png" width="72" height="72"><br/>Round</label>';
-?>
+</script>
         </fieldset>
       </div>
 
@@ -212,81 +180,69 @@
       <div id="fulldigits" data-role="fieldcontain">
         <fieldset data-role="controlgroup" data-type="horizontal">
           <legend>Digits Shape</legend>
+<script>
+  if (typeof (args.fulldigits) == "undefined") {
+    args.fulldigits = 0;
+  }
 
-<?php
-	if (!isset($_GET['fulldigits'])) {
-		$fulldigits = 0;
-	} else {
-		$fulldigits = $_GET['fulldigits'];
-	}
+  s = [ "", "" ];
+  s[args.fulldigits] = " checked";
 
-	$s = array( "", "");
-	$s[$fulldigits] = " checked";
-
-	echo '<input id="format1" name="fulldigits" value="0" data-theme="" type="radio"' . $s[0] . '><label for="format1"><img src="digits1.png" width="72" height="72"><br/>Original</label>';
-	echo '<input id="format2" name="fulldigits" value="1" data-theme="" type="radio"' . $s[1] . '><label for="format2"><img src="digits2.png" width="72" height="72"><br/>Regular</label>';
-?>
+  document.writeln('<input id="format1" name="fulldigits" value="0" data-theme="" type="radio"' + s[0] + '><label for="format1"><img src="digits1.png" width="72" height="72"><br/>Original</label>');
+  document.writeln('<input id="format2" name="fulldigits" value="1" data-theme="" type="radio"' + s[1] + '><label for="format2"><img src="digits2.png" width="72" height="72"><br/>Regular</label>');
+</script>
         </fieldset>
       </div>
+<script>
+  if (typeof (args.colorCapable) == "undefined") {
+    args.colorCapable = 0;
+  }
 
-<?php
-  if (isset($_GET['colorCapable'])) {
-    $colorCapable = $_GET['colorCapable'];
+  if ((args.colorCapable == "true") || (args.colorCapable == 1)) {
+    args.colorCapable = 1;
   } else {
-    $colorCapable = 0;
+    args.colorCapable = 0;
   }
 
-  if (($colorCapable == "true") || ($colorCapable == 1)) {
-    $colorCapable = 1;
-  } else {
-    $colorCapable = 0;
+  var showDiv = "";
+  if (args.colorCapable == 0) {
+    showDiv = ' style="display: none;"';
   }
- 
-  $showDiv = "";
 
-  if (!$colorCapable) {
-    $showDiv = " style=\"display: none;\"";
+  document.writeln('<div id="colortheme" data-role="fieldcontain"' + showDiv + '>');
+
+  if (typeof (args.colortheme) == "undefined") {
+    args.colortheme = 0;
   }
-?>
-
-<?php
-    echo "<div id=\"colortheme\" data-role=\"fieldcontain\"" . $showDiv . ">\n";
-
-    if (isset($_GET['colortheme'])) {
-      $colortheme = $_GET['colortheme'];
-    } else {
-      $colortheme = 0;
-    }
-?>
+</script>
 
 <div id="colorthemeaccordion" data-role="collapsible-set" data-theme="b" data-content-theme="b" data-icon-pos="left" data-inset="false">
     <div id="predefinedcolorthemes" data-role="collapsible">
       <h3>Predefined Color Themes</h3>
       <fieldset data-role="controlgroup" data-type="vertical">
-<?php
-        for ($i=1; $i<5; $i++) {
-          $s = "";
-          if ($i == $colortheme) {
-            $s = " checked";
-          }
-          echo '<input id="colortheme' . $i . '" name="colortheme" value="' . $i . '" data-theme="a" type="radio"' . $s . '><label for="colortheme' . $i . '">';
+<script>
+  for (i=1; i<5; i++) {
+    c = "";
+    if (i == args.colortheme) {
+      c = " checked";
+    }
+    document.writeln('<input id="colortheme' + i + '" name="colortheme" value="' + i + '" data-theme="a" type="radio"' + c + '><label for="colortheme' + i + '">');
 
-          echo '<img id="img_' . $i . '" src="theme_' . $i . '.png" width="45" height="44"><br/>';
-          echo '</label>';
-        }
-?>
+    document.writeln('<img id="img_' + i + '" src="theme_' + i + '.png" width="45" height="44"><br/></label>');
+  }
+
+</script>
       </fieldset>
     </div>
     <div id="customcolortheme" data-role="collapsible" data-theme="a">
         <h3>Custom Color Theme</h3>
-
-<?php
-  $s = "";
-  if ($colortheme == 0) {
-    $s = " checked";
+<script>
+  c = "";
+  if (args.colortheme == 0) {
+    c = " checked";
   }
-  echo '<input id="colortheme0" name="colortheme" value="0" type="radio"' . $s . '><label for="colortheme0">';
-?>
+  document.writeln('<input id="colortheme0" name="colortheme" value="0" type="radio"' + c + '><label for="colortheme0">');
+</script>
       <div style="width: 45px; background-color: black; height: 44px; padding: 1px;" id="img_0">
         <div id="line_0" style="width: 43px; background-color: white; height: 8px; border-top-left-radius: 5px; border-top-right-radius: 5px; margin: 0px 1px 0px 1px;"></div>
         <div id="line_1" style="width: 43px; background-color: white; height: 7px; margin: 1px 1px 0px 1px; float: left;">
@@ -336,23 +292,20 @@
 
 
   <script>
-<?php
-  if (isset($_GET['return_to'])) {
-    echo "var closeURL = \"" . $_GET['return_to'] . "\";\n";
-  } else {
-    echo "var closeURL = \"pebblejs://close#\";\n";
+  if (typeof (args.return_to) == "undefined") {
+    args.return_to = 'pebblejs://close#';
   }
 
-  if (isset($_GET['themecode'])) {
-    echo "var passedTheme = \"" . $_GET['themecode'] . "\";\n";
-  } else {
-    echo "var passedTheme = \"ffffffffffc0\";\n";
+  var closeURL = args.return_to;
+
+  if (typeof (args.themecode) == "undefined") {
+    args.themecode = 'ffffffffffc0';
   }
 
-  echo "var colorThemeAtStart = " . $colortheme . ";\n";
-  echo "var curBGColor = \"#000000\";\n";
-  echo "var curFGColor = [ \"#ffffff\", \"#ffffff\", \"#ffffff\", \"#ffffff\", \"#ffffff\" ];\n";
-?>
+  var passedTheme = args.themecode;
+  var colorThemeAtStart = args.colortheme;
+  var curBGColor = '#000000';
+  var curFGColor = [ '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff' ];
 
   var encodedTheme = "";
   var pebblePalette = [

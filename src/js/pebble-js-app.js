@@ -76,7 +76,20 @@ function logVariables(msg) {
 }
 
 function isWatchColorCapable() {
-  return ((typeof Pebble.getActiveWatchInfo === "function") && Pebble.getActiveWatchInfo().platform!='aplite');
+  if (typeof Pebble.getActiveWatchInfo === "function") {
+    try {
+      if (Pebble.getActiveWatchInfo().platform != 'aplite') {
+        return true;
+      } else {
+        return false;
+      }
+    } catch(err) {
+      console.log('ERROR calling Pebble.getActiveWatchInfo() : ' + err);
+      // Assuming Pebble App 3.0
+      return true;
+    }
+  }
+  //return ((typeof Pebble.getActiveWatchInfo === "function") && Pebble.getActiveWatchInfo().platform!='aplite');
 }
 
 Pebble.addEventListener("ready", function() {
@@ -87,7 +100,7 @@ Pebble.addEventListener("ready", function() {
 
 Pebble.addEventListener("showConfiguration", function(e) {
 	logVariables("showConfiguration Event");
-  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide_3.4.php?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&themecode=" + themecode + "&colorCapable=" + isWatchColorCapable();
+  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide_3.8.html?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&themecode=" + themecode + "&colorCapable=" + isWatchColorCapable();
   console.log(url);
 	Pebble.openURL(url);
 });
