@@ -19,6 +19,7 @@ enum {
   LANG_GERMAN,
   LANG_SPANISH,
   LANG_ITALIAN,
+  LANG_RUSSIAN,
   LANG_MAX
 };
 
@@ -54,13 +55,14 @@ enum {
 #define TILECORNERRADIUS 4
 #define DTILECORNERRADIUS 1
 
-char weekDay[LANG_MAX][7][3] = {
+char weekDay[LANG_MAX][7][4] = {
   { "ZO", "MA", "DI", "WO", "DO", "VR", "ZA" },  // Dutch
   { "SU", "MO", "TU", "WE", "TH", "FR", "SA" },  // English
   { "DI", "LU", "MA", "ME", "JE", "VE", "SA" },  // French
   { "SO", "MO", "DI", "MI", "DO", "FR", "SA" },  // German
   { "DO", "LU", "MA", "MI", "JU", "VI", "SA" },  // Spanish
-  { "DO", "LU", "MA", "ME", "GI", "VE", "SA" }  // Italian
+  { "DO", "LU", "MA", "ME", "GI", "VE", "SA" },  // Italian
+  { "BC", "\x62H", "BT", "CP", "\x63T", "\x62T", "C\x61" }  // Russian
 };
 
 int curLang = LANG_ENGLISH;
@@ -654,14 +656,14 @@ int hexStringToByte(const char *hexString) {
   int l = strlen(hexString);
   if (l == 0) return 0;
   if (l == 1) return hexCharToInt(hexString[0]);
-  
+
   return 16*hexCharToInt(hexString[0]) + hexCharToInt(hexString[1]);
 }
 
 void decodeThemeCode(char *code) {
 #ifdef PBL_COLOR
   int i;
-  
+
   for (i=0; i<6; i++) {
     color[COLOR_THEME_CUSTOM][i] = (GColor8){.argb=(uint8_t)hexStringToByte(code + 2*i)};
   }
@@ -677,7 +679,7 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   bool somethingChanged = false;
   bool digitShapesHaveToBeSwapped = false;
   bool colorThemeChanged = false;
-  
+
   Tuple *dateorder = dict_find(received, CONFIG_KEY_DATEORDER);
   Tuple *weekday = dict_find(received, CONFIG_KEY_WEEKDAY);
   Tuple *battery = dict_find(received, CONFIG_KEY_BATTERY);
@@ -805,7 +807,7 @@ void readConfig() {
     strcpy(themeCodeText, "ffffffffffc0");
     persist_write_string(CONFIG_KEY_THEMECODE, themeCodeText);
   }
-  
+
   decodeThemeCode(themeCodeText);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Stored config :");
@@ -905,7 +907,7 @@ void handle_deinit() {
   bluetooth_connection_service_unsubscribe();
   accel_tap_service_unsubscribe();
   tick_timer_service_unsubscribe();
-
+  
   for (i=0; i<NUMSLOTS; i++) {
     deinitSlot(i);
   }

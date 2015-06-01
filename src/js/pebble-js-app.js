@@ -84,7 +84,7 @@ function isWatchColorCapable() {
         return false;
       }
     } catch(err) {
-      console.log('ERROR calling Pebble.getActiveWatchInfo() : ' + err);
+      console.log('ERROR calling Pebble.getActiveWatchInfo() : ' + JSON.stringify(err));
       // Assuming Pebble App 3.0
       return true;
     }
@@ -100,7 +100,7 @@ Pebble.addEventListener("ready", function() {
 
 Pebble.addEventListener("showConfiguration", function(e) {
 	logVariables("showConfiguration Event");
-  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide_3.8.html?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&themecode=" + themecode + "&colorCapable=" + isWatchColorCapable();
+  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide_3.9.html?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&themecode=" + themecode + "&colorCapable=" + isWatchColorCapable();
   console.log(url);
 	Pebble.openURL(url);
 });
