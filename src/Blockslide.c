@@ -478,6 +478,11 @@ void handle_bluetooth(bool connected) {
 
         vibes_double_pulse();
       } else {
+        static const uint32_t const segments[] = {80, 30, 80, 30, 80};
+        VibePattern pat = {
+          .durations = segments,
+          .num_segments = ARRAY_LENGTH(segments),
+        };
         slot[2].curDigit = SPACE_L;
         slot[3].curDigit = SPACE_R;
 
@@ -490,7 +495,7 @@ void handle_bluetooth(bool connected) {
         slot[10].curDigit = 'D' - '0';
         slot[11].curDigit = SPACE_D;
 
-        vibes_long_pulse();
+        vibes_enqueue_custom_pattern(pat);
       }
 
       createAnim();
