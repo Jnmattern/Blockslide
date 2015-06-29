@@ -33,7 +33,8 @@ enum {
   CONFIG_KEY_BATTERY = 16,
   CONFIG_KEY_BLUETOOTH = 17,
   CONFIG_KEY_COLORTHEME = 18,
-  CONFIG_KEY_THEMECODE = 21
+  CONFIG_KEY_THEMECODE = 21,
+  CONFIG_KEY_INVERT = 22
 };
 
 
@@ -73,6 +74,7 @@ int roundCorners = 1;
 int fullDigits = 0;
 int batteryStatus = 1;
 int bluetoothStatus = 1;
+int invertStatus = 0;
 int colorTheme = 1;
 static char themeCodeText[20] = "ffffffffffc0";
 
@@ -163,7 +165,11 @@ void updateMainLayer(Layer *layer, GContext *ctx) {
 #ifdef PBL_COLOR
   graphics_context_set_fill_color(ctx, color[colorTheme][5]);
 #else
-  graphics_context_set_fill_color(ctx, GColorBlack);
+  if (invertStatus) {
+    graphics_context_set_fill_color(ctx, GColorWhite);
+  } else {
+    graphics_context_set_fill_color(ctx, GColorBlack);
+  }
 #endif
   graphics_fill_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h), 0, GCornerNone);
 }
@@ -227,7 +233,11 @@ void updateSlot(Layer *layer, GContext *ctx) {
 #ifdef PBL_COLOR
     graphics_context_set_fill_color(ctx, color[colorTheme][(digits[slot->curDigit][t][1]%5)]);
 #else
-    graphics_context_set_fill_color(ctx, GColorWhite);
+    if (invertStatus) {
+      graphics_context_set_fill_color(ctx, GColorBlack);
+    } else {
+      graphics_context_set_fill_color(ctx, GColorWhite);
+    }
 #endif
     graphics_fill_rect(ctx, GRect(ox, oy, slot->tileWidth, slot->tileHeight-stripedDigits), cornerRadius, cornerMask);
   }
@@ -478,7 +488,7 @@ void handle_bluetooth(bool connected) {
 
         vibes_double_pulse();
       } else {
-        static const uint32_t const segments[] = {80, 30, 80, 30, 80};
+        static const uint32_t  segments[] = {80, 30, 80, 30, 80};
         VibePattern pat = {
           .durations = segments,
           .num_segments = ARRAY_LENGTH(segments),
@@ -689,6 +699,7 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *weekday = dict_find(received, CONFIG_KEY_WEEKDAY);
   Tuple *battery = dict_find(received, CONFIG_KEY_BATTERY);
   Tuple *bluetooth = dict_find(received, CONFIG_KEY_BLUETOOTH);
+  Tuple *invert = dict_find(received, CONFIG_KEY_INVERT);
   Tuple *lang = dict_find(received, CONFIG_KEY_LANG);
   Tuple *stripes = dict_find(received, CONFIG_KEY_STRIPES);
   Tuple *corners = dict_find(received, CONFIG_KEY_ROUNDCORNERS);
@@ -696,7 +707,7 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *colorThemeTuple = dict_find(received, CONFIG_KEY_COLORTHEME);
   Tuple *themeCodeTuple = dict_find(received, CONFIG_KEY_THEMECODE);
 
-  if (dateorder && weekday && battery && bluetooth && lang && stripes && corners && digits && colorThemeTuple && themeCodeTuple) {
+  if (dateorder && weekday && battery && bluetooth && invert && lang && stripes && corners && digits && colorThemeTuple && themeCodeTuple) {
     somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
     somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
     somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
@@ -705,6 +716,7 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     checkAndSaveInt(&bluetoothStatus, bluetooth->value->int32, CONFIG_KEY_BLUETOOTH);
 
     digitShapesChanged = false;
+    digitShapesChanged |= checkAndSaveInt(&invertStatus, invert->value->int32, CONFIG_KEY_INVERT);
 
     colorThemeChanged = checkAndSaveString(themeCodeText, themeCodeTuple->value->cstring, CONFIG_KEY_THEMECODE);
     digitShapesChanged |= colorThemeChanged;
@@ -717,8 +729,8 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     digitShapesChanged |= checkAndSaveInt(&colorTheme, colorThemeTuple->value->int32, CONFIG_KEY_COLORTHEME);
 
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config:");
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, lang=%d",
-            USDate, showWeekday, batteryStatus, bluetoothStatus, curLang);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, invert=%d, lang=%d",
+            USDate, showWeekday, batteryStatus, bluetoothStatus, invertStatus, curLang);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
             stripedDigits, roundCorners, fullDigits, colorTheme);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "  themeCodeText=%s", themeCodeText);
@@ -771,6 +783,13 @@ void readConfig() {
     persist_write_int(CONFIG_KEY_BLUETOOTH, bluetoothStatus);
   }
 
+  if (persist_exists(CONFIG_KEY_INVERT)) {
+    invertStatus = persist_read_int(CONFIG_KEY_INVERT);
+  } else {
+    invertStatus = 0;
+    persist_write_int(CONFIG_KEY_INVERT, invertStatus);
+  }
+
   if (persist_exists(CONFIG_KEY_LANG)) {
     curLang = persist_read_int(CONFIG_KEY_LANG);
   } else {
@@ -816,8 +835,8 @@ void readConfig() {
   decodeThemeCode(themeCodeText);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Stored config :");
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d",
-          USDate, showWeekday, batteryStatus, bluetoothStatus);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, invert=%d",
+          USDate, showWeekday, batteryStatus, bluetoothStatus, invertStatus);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  lang=%d, stripedDigits=%d, roundCorners=%d, fullDigits=%d",
           curLang, stripedDigits, roundCorners, fullDigits);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s", colorTheme, themeCodeText);
@@ -859,18 +878,22 @@ void initSplash() {
 void handle_init() {
   int i;
 
-  initSplash();
-
-  window = window_create();
-  window_set_background_color(window, GColorBlack);
-  window_stack_push(window, true);
-
   srand(time(NULL));
   initColors();
 
   readConfig();
   swapDigitShapes();
   app_message_init();
+
+  initSplash();
+
+  window = window_create();
+  if (invertStatus) {
+    window_set_background_color(window, GColorWhite);
+  } else {
+    window_set_background_color(window, GColorBlack);
+  }
+  window_stack_push(window, true);
 
   rootLayer = window_get_root_layer(window);
   mainLayer = layer_create(layer_get_bounds(rootLayer));
@@ -926,4 +949,5 @@ int main(void) {
   app_event_loop();
   handle_deinit();
 }
+
 
