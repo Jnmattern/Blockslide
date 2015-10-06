@@ -34,7 +34,8 @@ enum {
   CONFIG_KEY_BLUETOOTH = 17,
   CONFIG_KEY_COLORTHEME = 18,
   CONFIG_KEY_THEMECODE = 21,
-  CONFIG_KEY_INVERT = 22
+  CONFIG_KEY_INVERT = 22,
+  CONFIG_KEY_MIRROR = 23
 };
 
 
@@ -77,18 +78,20 @@ int bluetoothStatus = 1;
 int invertStatus = 0;
 int colorTheme = 1;
 static char themeCodeText[20] = "ffffffffffc0";
+int mirror = 0;
 
 bool digitShapesChanged = false;
 
 
 typedef struct {
   Layer *layer;
-  int   prevDigit;
-  int   curDigit;
-  int   tileWidth;
-  int   tileHeight;
+  int num;
+  int prevDigit;
+  int curDigit;
+  int tileWidth;
+  int tileHeight;
   uint32_t normTime;
-  int   cornerRadius;
+  int cornerRadius;
 } digitSlot;
 
 Window *window;
@@ -175,7 +178,7 @@ void updateMainLayer(Layer *layer, GContext *ctx) {
 }
 
 void updateSlot(Layer *layer, GContext *ctx) {
-  int t, tx1, tx2, ty1, ty2, ox, oy;
+  int t, tx1, tx2, ty1, ty2, ox, oy, numcol;
   int cornerRadius = 0;
   uint8_t curCorner, prevCorner;
   GCornerMask cornerMask;
@@ -231,7 +234,11 @@ void updateSlot(Layer *layer, GContext *ctx) {
       }
     }
 #ifdef PBL_COLOR
-    graphics_context_set_fill_color(ctx, color[colorTheme][(digits[slot->curDigit][t][1]%5)]);
+    numcol = digits[slot->curDigit][t][1] % 5;
+    if (mirror && (slot->num == 2 || slot->num == 3)) {
+      numcol = 4 - numcol;
+    }
+    graphics_context_set_fill_color(ctx, color[colorTheme][numcol]);
 #else
     if (invertStatus) {
       graphics_context_set_fill_color(ctx, GColorBlack);
@@ -244,6 +251,7 @@ void updateSlot(Layer *layer, GContext *ctx) {
 }
 
 void initSlot(int i, Layer *parent) {
+  slot[i].num = i;
   slot[i].normTime = ANIMATION_NORMALIZED_MAX;
   slot[i].prevDigit = 0;
   slot[i].curDigit = startDigit[i];
@@ -706,8 +714,9 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *digits = dict_find(received, CONFIG_KEY_FULLDIGITS);
   Tuple *colorThemeTuple = dict_find(received, CONFIG_KEY_COLORTHEME);
   Tuple *themeCodeTuple = dict_find(received, CONFIG_KEY_THEMECODE);
+  Tuple *mirrorTuple = dict_find(received, CONFIG_KEY_MIRROR);
 
-  if (dateorder && weekday && battery && bluetooth && invert && lang && stripes && corners && digits && colorThemeTuple && themeCodeTuple) {
+  if (dateorder && weekday && battery && bluetooth && invert && lang && stripes && corners && digits && colorThemeTuple && themeCodeTuple && mirrorTuple) {
     somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
     somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
     somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
@@ -727,13 +736,14 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     digitShapesHaveToBeSwapped = checkAndSaveInt(&fullDigits, digits->value->int32, CONFIG_KEY_FULLDIGITS);
     digitShapesChanged |= digitShapesHaveToBeSwapped;
     digitShapesChanged |= checkAndSaveInt(&colorTheme, colorThemeTuple->value->int32, CONFIG_KEY_COLORTHEME);
+    digitShapesChanged |= checkAndSaveInt(&mirror, mirrorTuple->value->int32, CONFIG_KEY_MIRROR);
 
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config:");
     APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, invert=%d, lang=%d",
             USDate, showWeekday, batteryStatus, bluetoothStatus, invertStatus, curLang);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
             stripedDigits, roundCorners, fullDigits, colorTheme);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  themeCodeText=%s", themeCodeText);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  themeCodeText=%s, mirror=%d", themeCodeText, mirror);
 
     if (colorThemeChanged) {
       decodeThemeCode(themeCodeText);
@@ -832,6 +842,13 @@ void readConfig() {
     persist_write_string(CONFIG_KEY_THEMECODE, themeCodeText);
   }
 
+  if (persist_exists(CONFIG_KEY_MIRROR)) {
+    mirror = persist_read_int(CONFIG_KEY_MIRROR);
+  } else {
+    mirror = 0;
+    persist_write_int(CONFIG_KEY_MIRROR, mirror);
+  }
+
   decodeThemeCode(themeCodeText);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Stored config :");
@@ -839,7 +856,7 @@ void readConfig() {
           USDate, showWeekday, batteryStatus, bluetoothStatus, invertStatus);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  lang=%d, stripedDigits=%d, roundCorners=%d, fullDigits=%d",
           curLang, stripedDigits, roundCorners, fullDigits);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s", colorTheme, themeCodeText);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s, mirror=%d", colorTheme, themeCodeText, mirror);
 }
 
 static void app_message_init(void) {
@@ -860,7 +877,7 @@ void initSplash() {
   char vers[10];
   int len, s, i;
 
-  snprintf(vers, sizeof(vers), "V%d.%d", __pbl_app_info.process_version.major, __pbl_app_info.process_version.minor);
+  snprintf(vers, sizeof(vers), "%d.%d", __pbl_app_info.process_version.major, __pbl_app_info.process_version.minor);
   len = strlen(vers);
   s = (8 - len)/2;
 

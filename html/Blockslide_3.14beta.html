@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<!--html manifest="appcache.manifest"-->
+<html>
+        <head>
+                <meta charset='utf-8'>
+                <title>BlockSlide</title>
+                <meta name='viewport' content='width=device-width, initial-scale=1'>
+                <link rel='stylesheet' href='../jquery.mobile-1.3.2.min.css' />
+                <script src='../jquery-1.9.1.min.js'></script>
+                <script src='../jquery.mobile-1.3.2.min-custom.js'></script>
+
+                <link rel="stylesheet" type="text/css" href="../spectrum.css">
+                <script type='text/javascript' src="../spectrum.js"></script>
+                <script type='text/javascript' src="../argsparse.js"></script>
+
+                <style>
+                        .ui-header .ui-title { margin-left: 1em; margin-right: 1em; text-overflow: clip; }
+                </style>
+        </head>
+		<body>
+<div data-role="page" id="page1">
+    <div id="head" data-theme="a" data-role="header" data-position="fixed" data-tap-toggle="false">
+        <div class="ui-grid-a">
+            <div class="ui-block-a">
+                <input id="cancel" type="submit" data-theme="c" data-icon="delete" data-iconpos="left"
+                value="Cancel" data-mini="true">
+            </div>
+            <div class="ui-block-b">
+                <input id="save" type="submit" data-theme="b" data-icon="check" data-iconpos="right"
+                value="Save" data-mini="true">
+            </div>
+        </div>
+    </div>
+
+<script>
+  var curBGColor = '#000000';
+  var curFGColor = [ '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff' ];
+
+  if (typeof (args.colorCapable) == "undefined") {
+    args.colorCapable = 0;
+  }
+
+  if ((args.colorCapable == "true") || (args.colorCapable == 1)) {
+    args.colorCapable = 1;
+  } else {
+    args.colorCapable = 0;
+  }
+
+  var themecodes = [
+    [ "ffffffffffc0", "White on Black" ],
+    [ "fefcf8f4f0c0", "Sunset" ],
+    [ "efdfcec9c8c0", "Aquamarine" ],
+    [ "fbf7f3f2f1c0", "Candy" ],
+    [ "cbcffef8e4c0", "Earth and Sky" ],
+    [ "c0c0c0c0c0ff", "Black on White" ],
+    [ "efdfcfcbc7c0", "Ice Blue" ]
+  ];
+
+function color8to24bit(color8bit) {
+  var c = parseInt(color8bit, 16) - 192;
+  var r = 0x55 * ((c & 0x30) >> 4);
+  var g = 0x55 * ((c & 0xc) >> 2);
+  var b = 0x55 * (c & 0x3);
+  var rgb = (r << 16) + (g << 8) + (b);
+  var result = "#" + ("000000" + rgb.toString(16)).slice(-6);
+
+  return result;
+}
+
+function charIsValidHexa(c) {
+  return ( ( (c >= "0".charCodeAt(0)) && (c <= "9".charCodeAt(0)) ) || ( (c >= "a".charCodeAt(0)) && (c <= "f".charCodeAt(0)) ) );
+}
+
+function decodeTheme(themeString) {
+  var themeColors = [];
+  var fallbackTheme = "f4e2f0cccbfc";
+  var validCode = true;
+  var i = 0;
+
+  themeString = themeString.toLowerCase();
+
+  if (themeString == "undefined") {
+    themeString = fallbackTheme;
+  }
+
+  var len = themeString.length;
+  if (len != 12) {
+    alert("Invalid Theme Code: must be 12 characters long.");
+    validCode = false;
+  }
+
+  invalidChars = false;
+  for (i=0; i<len; i++) {
+    curChar = themeString.charCodeAt(i);
+    if (!charIsValidHexa(themeString.charCodeAt(i))) {
+      invalidChars = true;
+      break;
+    }
+  }
+
+  if (invalidChars && validCode) {
+    alert("Invalid Theme Code: must only contain chars from 0 to 9 or a to f");
+  }
+
+  if (validCode) {
+    for (i=0; i<5; i++) {
+      curFGColor[i] = color8to24bit(themeString.substr(2*i, 2));
+      themeColors[i] = curFGColor[i];
+    }
+    curBGColor = color8to24bit(themeString.substr(10, 2));
+    themeColors[5] = curBGColor;
+  }
+  return themeColors;
+}
+
+</script>
+    <div data-role="content">
+<div class="ui-grid-a">
+  <div class="ui-block-a">
+    <div id="dateorder" data-role="fieldcontain" class="ui-bar">
+			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+        <legend>Date format</legend>
+<script>
+  var s;
+
+  if (typeof (args.dateorder) == "undefined") {
+    args.dateorder = 1;
+  }
+
+  s = [ "", "" ];
+  s[args.dateorder] = " checked";
+
+  document.writeln('<input id="format1" name="dateorder" value="0" data-theme="" type="radio"' + s[0] + '><label for="format1">dd mm</label>');
+  document.writeln('<input id="format2" name="dateorder" value="1" data-theme="" type="radio"' + s[1] + '><label for="format2">mm dd</label>');
+</script>
+			</fieldset>
+		</div>
+  </div>
+  <div class="ui-block-b">
+    <div data-role="fieldcontain" class="ui-bar">
+          <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+            <legend>Show day of week</legend>
+<script>
+  if (typeof (args.weekday) == "undefined") {
+    args.weekday = 0;
+  }
+
+  s = [ "", "" ];
+  s[args.weekday] = " checked";
+
+	document.writeln('<input id="weekday1" name="weekday" value="0" data-theme="" type="radio"' + s[0] + '><label for="weekday1">Off</label>');
+	document.writeln('<input id="weekday2" name="weekday" value="1" data-theme="" type="radio"' + s[1] + '><label for="weekday2">On</label>');
+</script>
+        </fieldset>
+        </div>
+  </div>
+  <div class="ui-block-a">
+    <div id="battery" data-role="fieldcontain" class="ui-bar">
+			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+        <legend>Tap to show battery</legend>
+<script>
+  if (typeof (args.battery) == "undefined") {
+    args.battery = 1;
+  }
+
+  s = [ "", "" ];
+  s[args.battery] = " checked";
+
+  document.writeln('<input id="battery1" name="battery" value="0" data-theme="" type="radio"' + s[0] + '><label for="battery1">Off</label>');
+	document.writeln('<input id="battery2" name="battery" value="1" data-theme="" type="radio"' + s[1] + '><label for="battery2">On</label>');
+</script>
+			</fieldset>
+		</div>
+  </div>
+  <div class="ui-block-b">
+    <div id="bluetooth" data-role="fieldcontain" class="ui-bar">
+      <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+        <legend>Vibrate on BT disconnect</legend>
+<script>
+  if (typeof (args.bluetooth) == "undefined") {
+    args.bluetooth = 1;
+  }
+
+  s = [ "", "" ];
+  s[args.bluetooth] = " checked";
+
+	document.writeln('<input id="bluetooth1" name="bluetooth" value="0" data-theme="" type="radio"' + s[0] + '><label for="bluetooth1">Off</label>');
+	document.writeln('<input id="bluetooth2" name="bluetooth" value="1" data-theme="" type="radio"' + s[1] + '><label for="bluetooth2">On</label>');
+</script>
+        </fieldset>
+      </div>
+  </div>
+<script>
+  var showDiv = "";
+  if (args.colorCapable == 1) {
+    showDiv = ' style="display: none;"';
+  }
+
+  document.writeln('<div class="ui-block-a"' + showDiv + '>');
+ </script>
+    <div id="invert" data-role="fieldcontain" class="ui-bar">
+      <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+        <legend>Invert Black&amp;White</legend>
+<script>
+  if (typeof (args.invert) == "undefined") {
+    args.invert = 0;
+  }
+
+  s = [ "", "" ];
+  s[args.invert] = " checked";
+
+	document.writeln('<input id="invert1" name="invert" value="0" data-theme="" type="radio"' + s[0] + '><label for="invert1">Off</label>');
+	document.writeln('<input id="invert2" name="invert" value="1" data-theme="" type="radio"' + s[1] + '><label for="invert2">On</label>');
+</script>
+        </fieldset>
+      </div>
+  </div>
+</div>
+
+
+		<div data-role="fieldcontain">
+			<label for="lang">
+				Language
+			</label>
+			<select id="lang" data-native-menu="true" name="lang">
+<script>
+  var langs = [
+    [ 0, 'Dutch' ],
+    [ 1, 'English' ],
+    [ 2, 'French' ],
+    [ 3, 'German' ],
+    [ 5, 'Italian' ],
+    [ 6, 'Russian' ],
+    [ 4, 'Spanish' ]
+  ];
+
+  if (typeof (args.lang) == "undefined") {
+    args.lang = 1;
+  }
+
+  var i, c;
+  for (i=0; i<langs.length; i++) {
+    if (args.lang == langs[i][0]) {
+      c = " selected";
+    } else {
+      c = "";
+    }
+    document.writeln('<option value="' + langs[i][0] + '" ' + c + '>' + langs[i][1] + '</option>');
+  }
+</script>
+			</select>
+		</div>
+
+      <div id="stripes" data-role="fieldcontain">
+        <fieldset data-role="controlgroup" data-type="horizontal">
+          <legend>Stripes</legend>
+<script>
+  if (typeof (args.stripes) == "undefined") {
+    args.stripes = 1;
+  }
+
+  s = [ "", "" ];
+  s[args.stripes] = " checked";
+
+  document.writeln('<input id="stripes1" name="stripes" value="0" data-theme="" type="radio"' + s[0] + '><label for="stripes1"><img src="digitsPlain.png" width="72" height="72"><br/>Plain</label>');
+  document.writeln('<input id="stripes2" name="stripes" value="1" data-theme="" type="radio"' + s[1] + '><label for="stripes2"><img src="digits1.png" width="72" height="72"><br/>Striped</label>');
+</script>
+        </fieldset>
+      </div>
+
+      <div id="roundcorners" data-role="fieldcontain">
+        <fieldset data-role="controlgroup" data-type="horizontal">
+          <legend>Corners</legend>
+<script>
+  if (typeof (args.roundcorners) == "undefined") {
+    args.roundcorners = 1;
+  }
+
+  s = [ "", "" ];
+  s[args.roundcorners] = " checked";
+
+  document.writeln('<input id="corners1" name="roundcorners" value="0" data-theme="" type="radio"' + s[0] + '><label for="corners1"><img src="digitsFlatCorners.png" width="72" height="72"><br/>Flat</label>');
+  document.writeln('<input id="corners2" name="roundcorners" value="1" data-theme="" type="radio"' + s[1] + '><label for="corners2"><img src="digitsRoundCorners.png" width="72" height="72"><br/>Round</label>');
+
+</script>
+        </fieldset>
+      </div>
+
+
+      <div id="fulldigits" data-role="fieldcontain">
+        <fieldset data-role="controlgroup" data-type="horizontal">
+          <legend>Digits Shape</legend>
+<script>
+  if (typeof (args.fulldigits) == "undefined") {
+    args.fulldigits = 0;
+  }
+
+  s = [ "", "" ];
+  s[args.fulldigits] = " checked";
+
+  document.writeln('<input id="format1" name="fulldigits" value="0" data-theme="" type="radio"' + s[0] + '><label for="format1"><img src="digits1.png" width="72" height="72"><br/>Original</label>');
+  document.writeln('<input id="format2" name="fulldigits" value="1" data-theme="" type="radio"' + s[1] + '><label for="format2"><img src="digits2.png" width="72" height="72"><br/>Regular</label>');
+</script>
+        </fieldset>
+      </div>
+<script>
+  var showDiv = "";
+  if (args.colorCapable == 0) {
+    showDiv = ' style="display: none;"';
+  }
+
+  document.writeln('<div id="colortheme" data-role="fieldcontain"' + showDiv + '>');
+
+  if (typeof (args.colortheme) == "undefined") {
+    args.colortheme = 0;
+  }
+</script>
+
+<div id="colorthemeaccordion" data-role="collapsible-set" data-theme="b" data-content-theme="b" data-icon-pos="left" data-inset="false">
+    <div id="predefinedcolorthemes" data-role="collapsible">
+      <h3>Predefined Color Themes</h3>
+      <fieldset data-role="controlgroup" data-type="vertical">
+<script>
+  var len = themecodes.length;
+  for (var i=0; i<len; i++) {
+    c = "";
+    if (i == args.colortheme) {
+      c = " checked";
+    }
+    document.writeln('<input id="colortheme' + i + '" name="colortheme" value="' + i + '" data-theme="a" type="radio"' + c + '><label for="colortheme' + i + '">');
+
+    var themecolors = decodeTheme(themecodes[i][0]);
+    document.writeln('      <table><tr><td>');
+    document.writeln('    <div style="width: 45px; background-color: '+themecolors[5]+'; height: 44px; padding: 1px;" id="img_'+i+'">');
+    document.writeln('      <div id="p'+i+'_0" style="width: 43px; background-color: '+themecolors[0]+'; height: 8px; border-top-left-radius: 5px; border-top-right-radius: 5px; margin: 0px 1px 0px 1px;"></div>');
+    document.writeln('      <div id="p'+i+'_1" style="width: 43px; background-color: '+themecolors[1]+'; height: 7px; margin: 1px 1px 0px 1px; float: left;">');
+    document.writeln('        <div id="p'+i+'_12" style="width: 13px; background-color: '+themecolors[5]+'; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>');
+    document.writeln('      </div>');
+    document.writeln('      <div id="p'+i+'_2" style="width: 43px; background-color: '+themecolors[2]+'; height: 7px; margin: 1px 1px 0px 1px; float: left;">');
+    document.writeln('        <div id="p'+i+'_22" style="width: 13px; background-color: '+themecolors[5]+'; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>');
+    document.writeln('      </div>');
+    document.writeln('      <div id="p'+i+'_3" style="width: 43px; background-color: '+themecolors[3]+'; height: 7px; margin: 1px; float: left;">');
+    document.writeln('        <div id="p'+i+'_32" style="width: 13px; background-color: '+themecolors[5]+'; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>');
+    document.writeln('      </div>');
+    document.writeln('      <div id="p'+i+'_4" style="width: 43px; background-color: '+themecolors[4]+'; height: 8px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; clear: both; margin: 1px 1px 0px 1px;"></div>');
+    document.writeln('    </div>');
+    document.writeln('    </td><td>' + themecodes[i][1] + '</td></tr></table></label>');
+  }
+
+</script>
+      </fieldset>
+    </div>
+    <div id="customcolortheme" data-role="collapsible" data-theme="a">
+        <h3>Custom Color Theme</h3>
+<script>
+  c = "";
+  if (args.colortheme == 0) {
+    c = " checked";
+  }
+  document.writeln('<input id="colortheme0" name="colortheme" value="0" type="radio"' + c + '>');
+</script>
+    <label for="colortheme0">
+      <div style="width: 45px; background-color: black; height: 44px; padding: 1px;" id="img_0">
+        <div id="line_0" style="width: 43px; background-color: white; height: 8px; border-top-left-radius: 5px; border-top-right-radius: 5px; margin: 0px 1px 0px 1px;"></div>
+        <div id="line_1" style="width: 43px; background-color: white; height: 7px; margin: 1px 1px 0px 1px; float: left;">
+          <div id="line_12" style="width: 13px; background-color: black; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>
+        </div>
+        <div id="line_2" style="width: 43px; background-color: white; height: 7px; margin: 1px 1px 0px 1px; float: left;">
+          <div id="line_22" style="width: 13px; background-color: black; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>
+        </div>
+        <div id="line_3" style="width: 43px; background-color: white; height: 7px; margin: 1px; float: left;">
+          <div id="line_32" style="width: 13px; background-color: black; height: 7px; margin: 0px 0px 0px 15px; float: left;"></div>
+        </div>
+        <div id="line_4" style="width: 43px; background-color: white; height: 8px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; clear: both; margin: 1px 1px 0px 1px;"></div>
+      </div>
+    </label>
+  <div class="ui-grid-a">
+    <div class="ui-block-a">
+      <legend>Background</legend>
+    </div>
+    <div class="ui-block-b">
+      <input id="bgcolorpicker" name="bgcolorpicker">
+    </div>
+    <div class="ui-block-a">
+      <legend>Digits Lines</legend>
+    </div>
+    <div class="ui-block-b">
+      <fieldset data-role="controlgroup" data-type="vertical">
+        <input id="fgcolorpicker0" name="fgcolorpicker0">
+        <input id="fgcolorpicker1" name="fgcolorpicker1">
+        <input id="fgcolorpicker2" name="fgcolorpicker2">
+        <input id="fgcolorpicker3" name="fgcolorpicker3">
+        <input id="fgcolorpicker4" name="fgcolorpicker4">
+      </fieldset>
+    </div>
+    <div class="ui-block-a">
+      <input type="text" id="themecode" name="themecode" data-clear-btn="true">
+    </div>
+    <div class="ui-block-b">
+      <input id="parseTheme" type="button" data-theme="a" data-icon="edit" data-iconpos="left" value="Use Code" data-mini="true">
+    </div>
+  </div>
+
+
+    </div>
+</div>
+
+      </div>
+      </div>
+
+
+  <script>
+  if (typeof (args.return_to) == "undefined") {
+    args.return_to = 'pebblejs://close#';
+  }
+
+  var closeURL = args.return_to;
+
+  if (typeof (args.themecode) == "undefined") {
+    args.themecode = 'ffffffffffc0';
+  }
+
+  var passedTheme = args.themecode;
+  var colorThemeAtStart = args.colortheme;
+
+  var encodedTheme = "";
+  var pebblePalette = [
+    [ '000', '005', '00a', '00f', '050', '055', '05a', '05f' ],
+    [ '500', '505', '50a', '50f', '550', '555', '55a', '55f' ],
+    [ 'a00', 'a05', 'a0a', 'a0f', 'a50', 'a55', 'a5a', 'a5f' ],
+    [ 'f00', 'f05', 'f0a', 'f0f', 'f50', 'f55', 'f5a', 'f5f' ],
+    [ '0a0', '0a5', '0aa', '0af', '0f0', '0f5', '0fa', '0ff' ],
+    [ '5a0', '5a5', '5aa', '5af', '5f0', '5f5', '5fa', '5ff' ],
+    [ 'aa0', 'aa5', 'aaa', 'aaf', 'af0', 'af5', 'afa', 'aff' ],
+    [ 'fa0', 'fa5', 'faa', 'faf', 'ff0', 'ff5', 'ffa', 'fff' ]
+  ];
+
+
+  function color24to8bit(color) {
+    var r = parseInt(color.substr(1, 2), 16) >> 6;
+    var g = parseInt(color.substr(3, 2), 16) >> 6;
+    var b = parseInt(color.substr(5, 2), 16) >> 6;
+
+    var result = (192+(r*16)+(g*4)+b).toString(16);
+    return ("00" + result).slice(-2);
+  }
+
+  function encodeColors() {
+    var i = 0;
+    encodedTheme = "";
+
+    for (i=0; i<5; i++) {
+      encodedTheme += color24to8bit(curFGColor[i]);
+    }
+    encodedTheme += color24to8bit(curBGColor);
+  }
+
+  function setColors() {
+    var i = 0;
+    document.getElementById("img_0").style.backgroundColor = curBGColor;
+    document.getElementById("line_12").style.backgroundColor = curBGColor;
+    document.getElementById("line_22").style.backgroundColor = curBGColor;
+    document.getElementById("line_32").style.backgroundColor = curBGColor;
+ 
+    for (i=0; i<5; i++) {
+      document.getElementById("line_"+i).style.backgroundColor = curFGColor[i];
+    }
+
+    encodeColors();
+
+    $('#themecode').val(encodedTheme);
+  }
+
+  function selectCustomTheme() {
+    $("input:radio[name=colortheme][value=0]").trigger('click');
+    $("input:radio[name=colortheme]").checkboxradio("refresh");
+  }
+
+  function setBGColor(color) {
+    curBGColor = color.toHexString();
+    setColors();
+    selectCustomTheme();
+    setColorPickers();
+  }
+
+  function setFGColor(i, color) {
+    curFGColor[i] = color.toHexString();
+    setColors();
+    selectCustomTheme();
+    setColorPickers();
+  }
+
+  function setColorPickers() {
+    var i = 0;
+    $("#bgcolorpicker").spectrum("set", curBGColor);
+
+    for (i=0; i<5; i++) {
+      $("#fgcolorpicker"+i).spectrum("set", curFGColor[i]);
+    }
+  }
+
+  function saveOptions() {
+    var themenum = parseInt($("input[name=colortheme]:checked").val(), 10);
+    var options = {
+      'dateorder': parseInt($("input[name=dateorder]:checked").val(), 10),
+      'weekday': parseInt($("input[name=weekday]:checked").val(), 10),
+      'battery': parseInt($("input[name=battery]:checked").val(), 10),
+      'bluetooth': parseInt($("input[name=bluetooth]:checked").val(), 10),
+      'invert': parseInt($("input[name=invert]:checked").val(), 10),
+      'lang': parseInt($("#lang").val(), 10),
+      'stripes': parseInt($("input[name=stripes]:checked").val(), 10),
+      'roundcorners': parseInt($("input[name=roundcorners]:checked").val(), 10),
+      'fulldigits': parseInt($("input[name=fulldigits]:checked").val(), 10),
+      'colortheme': themenum,
+      'themecode': (themenum)?themecodes[themenum][0]:$("#themecode").val()
+    }
+    console.log(JSON.stringify(options));
+    return options;
+  }
+
+  $().ready(function() {
+
+    decodeTheme(passedTheme);
+
+    $("#bgcolorpicker").spectrum({
+        color: curBGColor,
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setBGColor(color);
+        },
+        palette: pebblePalette
+      });
+
+    $("#fgcolorpicker0").spectrum({
+        color: curFGColor[0],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(0, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#fgcolorpicker1").spectrum({
+        color: curFGColor[1],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(1, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#fgcolorpicker2").spectrum({
+        color: curFGColor[2],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(2, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#fgcolorpicker3").spectrum({
+        color: curFGColor[3],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(3, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#fgcolorpicker4").spectrum({
+        color: curFGColor[4],
+        showPaletteOnly: true,
+        hideAfterPaletteSelect:true,
+        change: function(color) {
+          setFGColor(4, color);
+        },
+        palette: pebblePalette
+    });
+
+    $("#cancel").click(function() {
+      console.log("Cancel");
+      document.location = closeURL;
+    });
+
+    $("#save").click(function() {
+      console.log("Submit");
+      
+      var location = closeURL + encodeURIComponent(JSON.stringify(saveOptions()));
+      console.log("Close: " + location);
+      console.log(location);
+      document.location = location;
+    });
+
+    $("#parseTheme").click(function() {
+      decodeTheme($("#themecode").val());
+      setColors();
+      setColorPickers();
+      selectCustomTheme();
+    });
+
+    $('.sp-replacer').unwrap();
+
+    setColors();
+
+    if (colorThemeAtStart == 0) {
+      $( "#customcolortheme").trigger( "expand" );
+    } else {
+      $( "#predefinedcolorthemes").trigger( "expand" );
+    }
+  });
+  </script>
+</body>
+</html>

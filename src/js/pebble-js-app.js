@@ -9,6 +9,7 @@ var fulldigits;
 var colortheme;
 var themecode;
 var invert;
+var mirror;
 
 function readConfig() {
   dateorder = localStorage.getItem("dateorder");
@@ -65,6 +66,11 @@ function readConfig() {
   if (!themecode) {
     themecode = "ffffffffffc0";
   }
+
+  mirror = localStorage.getItem("mirror");
+  if (!mirror) {
+    mirror = 0;
+  }
 }
 
 function logVariables(msg) {
@@ -80,6 +86,7 @@ function logVariables(msg) {
   console.log("	fulldigits: " + fulldigits);
   console.log("	colortheme: " + colortheme);
   console.log("	themecode: " + themecode);
+  console.log("	mirror: " + mirror);
 }
 
 function isWatchColorCapable() {
@@ -104,12 +111,28 @@ function isWatchColorCapable() {
 Pebble.addEventListener("ready", function() {
   readConfig();
   logVariables("Ready Event");
-	Pebble.sendAppMessage(JSON.parse('{"dateorder":'+dateorder+',"weekday":'+weekday+',"battery":'+battery+',"bluetooth":'+bluetooth+',"invert":'+invert+',"lang":'+lang+',"stripes":'+stripes+',"roundcorners":'+roundcorners+',"fulldigits":'+fulldigits+',"colortheme":'+colortheme+',"themecode":"'+themecode+'"}'));
+  var msg = '{';
+  msg += '"dateorder":'+dateorder;
+  msg += ',"weekday":'+weekday;
+  msg += ',"battery":'+battery;
+  msg += ',"bluetooth":'+bluetooth;
+  msg += ',"invert":'+invert;
+  msg += ',"lang":'+lang;
+  msg += ',"stripes":'+stripes;
+  msg += ',"roundcorners":'+roundcorners;
+  msg += ',"fulldigits":'+fulldigits;
+  msg += ',"colortheme":'+colortheme;
+  msg += ',"themecode":"'+themecode+'"';
+  msg += ',"mirror":'+mirror;
+  msg += '}';
+  console.log("Sending message to watch :");
+  console.log(" " + msg);
+	Pebble.sendAppMessage(JSON.parse(msg));
 });
 
 Pebble.addEventListener("showConfiguration", function(e) {
 	logVariables("showConfiguration Event");
-  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide_3.12.html?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&invert=" + invert + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&themecode=" + themecode + "&colorCapable=" + isWatchColorCapable();
+  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide_3.13.html?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&invert=" + invert + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&themecode=" + themecode + "&colorCapable=" + isWatchColorCapable() + "&mirror=" + mirror;
   console.log(url);
 	Pebble.openURL(url);
 });
@@ -154,6 +177,9 @@ Pebble.addEventListener("webviewclosed", function(e) {
 
   themecode = configuration["themecode"];
 	localStorage.setItem("themecode", themecode);
+
+  mirror = configuration["mirror"];
+	localStorage.setItem("mirror", mirror);
 });
 
 

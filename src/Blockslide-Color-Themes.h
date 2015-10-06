@@ -6,6 +6,7 @@ enum {
   COLOR_THEME_AQUAMARINE,
   COLOR_THEME_CANDY,
   COLOR_THEME_EARTH_AND_SKY,
+  COLOR_THEME_ICE_BLUE,
   COLOR_THEME_MAX
 };
 
@@ -51,6 +52,14 @@ void initColors() {
   color[COLOR_THEME_EARTH_AND_SKY][3] = GColorChromeYellow;
   color[COLOR_THEME_EARTH_AND_SKY][4] = GColorWindsorTan;
   color[COLOR_THEME_EARTH_AND_SKY][5] = GColorBlack;
+  
+  // Ice Blue // efdfcfcbc7c0
+  color[COLOR_THEME_ICE_BLUE][0] = GColorCeleste;
+  color[COLOR_THEME_ICE_BLUE][1] = GColorElectricBlue;
+  color[COLOR_THEME_ICE_BLUE][2] = GColorCyan;
+  color[COLOR_THEME_ICE_BLUE][3] = GColorVividCerulean;
+  color[COLOR_THEME_ICE_BLUE][4] = GColorBlueMoon;
+  color[COLOR_THEME_ICE_BLUE][5] = GColorBlack;
 }
 #else
 // Pebble B/W
