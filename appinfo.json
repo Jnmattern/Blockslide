@@ -4,7 +4,7 @@
   "longName": "Blockslide",
   "companyName": "Jnm",
   "versionCode": 1,
-  "versionLabel": "3.13",
+  "versionLabel": "3.14",
   "watchapp": {
     "watchface": true
   },
@@ -37,7 +37,8 @@
   },
   "targetPlatforms": [
     "aplite",
-    "basalt"
+    "basalt",
+	"chalk"
   ],
   "sdkVersion": "3"
 }

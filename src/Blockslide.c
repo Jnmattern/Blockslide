@@ -38,24 +38,46 @@ enum {
   CONFIG_KEY_MIRROR = 23
 };
 
+#define DIGIT_CHANGE_ANIM_DURATION 800
+#define STARTDELAY 700
+#define BATTERYDELAY 5000
 
+#if defined(PBL_ROUND)
+
+#define HSPACE 6
+#define DHSPACE 4
+#define VSPACE 6
+#define TILEW 20
+#define TILEH 11
+#define DTILEW 4
+#define DTILEH 3
+
+#define SCREENW 180
+#define SCREENH 180
+#define CX 90
+#define CY 90
+
+#else
+
+#define HSPACE 8
+#define DHSPACE 4
+#define VSPACE 8
 #define TILEW 22
 #define TILEH 13
 #define DTILEW 5
 #define DTILEH 4
-#define HSPACE 8
-#define DHSPACE 4
-#define VSPACE 8
-#define DIGIT_CHANGE_ANIM_DURATION 800
-#define STARTDELAY 700
-#define BATTERYDELAY 5000
+
 #define SCREENW 144
 #define SCREENH 168
 #define CX 72
 #define CY 84
+
+#endif
+
 #define NUMSLOTS 12
 #define TILECORNERRADIUS 4
 #define DTILECORNERRADIUS 1
+
 
 char weekDay[LANG_MAX][7][4] = {
   { "ZO", "MA", "DI", "WO", "DO", "VR", "ZA" },  // Dutch
@@ -128,6 +150,7 @@ GRect slotFrame(int i) {
   int x, y;
   int w = slot[i].tileWidth*3;
   int h = slot[i].tileHeight*5;
+  static int offsetY = (SCREENH-2*(VSPACE+5*TILEH)-5*DTILEH)/2;
 
   if (i<4) {
     // Hour slot -> big digits
@@ -138,15 +161,14 @@ GRect slotFrame(int i) {
     }
 
     if (i<2) {
-      y = 1;
+      y =  offsetY;
     } else {
-      y = 1 + h + VSPACE;
+      y = offsetY + VSPACE + h;
     }
   } else {
     // Date slot -> small digits
-    //x = CX + (i-7)*(w+DHSPACE) + DHSPACE/2 - ((i<6)?16:0) + ((i>7)?16:0);
-    x = 5 + (i-4)*2 + (i-4)*w;
-    y = SCREENH - h - VSPACE/2;
+    x = (SCREENW-(14+8*w))/2 + (i-4)*2 + (i-4)*w;
+    y = offsetY + VSPACE + DHSPACE + 10*TILEH;
   }
 
   return GRect(x, y, w, h);
@@ -165,6 +187,9 @@ digitSlot *findSlot(Layer *layer) {
 
 void updateMainLayer(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
+  
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "mainLayer (%d,%d)/(%d,%d)", bounds.origin.x, bounds.origin.y, bounds.size.w, bounds.size.h);
+  
 #ifdef PBL_COLOR
   graphics_context_set_fill_color(ctx, color[colorTheme][5]);
 #else
