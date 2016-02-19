@@ -20,6 +20,7 @@ enum {
   LANG_SPANISH,
   LANG_ITALIAN,
   LANG_RUSSIAN,
+  LANG_SWEDISH,
   LANG_MAX
 };
 
@@ -86,7 +87,8 @@ char weekDay[LANG_MAX][7][4] = {
   { "SO", "MO", "DI", "MI", "DO", "FR", "SA" },  // German
   { "DO", "LU", "MA", "MI", "JU", "VI", "SA" },  // Spanish
   { "DO", "LU", "MA", "ME", "GI", "VE", "SA" },  // Italian
-  { "BC", "\x62H", "BT", "CP", "\x63T", "\x62T", "C\x61" }  // Russian
+  { "BC", "\x62H", "BT", "CP", "\x63T", "\x62T", "C\x61" },  // Russian
+  { "SO", "MA", "TI", "ON", "TO", "FR", "LO" }  // Swedish
 };
 
 int curLang = LANG_ENGLISH;
@@ -949,7 +951,7 @@ void handle_init() {
   initDigitCorners();
 
   animImpl.setup = NULL;
-  animImpl.update = animateDigits;
+  animImpl.update = (AnimationUpdateImplementation)animateDigits;
 #ifdef PBL_PLATFORM_APLITE
   animImpl.teardown = destroyAnim;
 #else

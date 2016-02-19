@@ -63,7 +63,7 @@ void initColors() {
 }
 #else
 // Pebble B/W
-#define GColorFromHEX(v) GColorBlack
+//#define GColorFromHEX(v) GColorBlack
 
 void initColors() {
   // Do nothing!
