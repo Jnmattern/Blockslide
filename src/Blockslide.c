@@ -36,7 +36,8 @@ enum {
   CONFIG_KEY_COLORTHEME = 18,
   CONFIG_KEY_THEMECODE = 21,
   CONFIG_KEY_INVERT = 22,
-  CONFIG_KEY_MIRROR = 23
+  CONFIG_KEY_MIRROR = 23,
+  CONFIG_KEY_SPLASH = 24
 };
 
 #define DIGIT_CHANGE_ANIM_DURATION 800
@@ -103,9 +104,11 @@ int invertStatus = 0;
 int colorTheme = 1;
 static char themeCodeText[20] = "ffffffffffc0";
 int mirror = 0;
+int splash = 1;
 
 bool digitShapesChanged = false;
 
+bool doanim = true;
 
 typedef struct {
   Layer *layer;
@@ -427,8 +430,11 @@ void handle_tick(struct tm *now, TimeUnits units_changed) {
     //
     //APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_tick: rescheduling anim");
     //
-    createAnim();
-    animation_schedule(anim);
+
+    if (doanim) {
+      createAnim();
+      animation_schedule(anim);
+    }
   }
 
   //
@@ -742,8 +748,9 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *colorThemeTuple = dict_find(received, CONFIG_KEY_COLORTHEME);
   Tuple *themeCodeTuple = dict_find(received, CONFIG_KEY_THEMECODE);
   Tuple *mirrorTuple = dict_find(received, CONFIG_KEY_MIRROR);
+  Tuple *splashTuple = dict_find(received, CONFIG_KEY_SPLASH);
 
-  if (dateorder && weekday && battery && bluetooth && invert && lang && stripes && corners && digits && colorThemeTuple && themeCodeTuple && mirrorTuple) {
+  if (dateorder && weekday && battery && bluetooth && invert && lang && stripes && corners && digits && colorThemeTuple && themeCodeTuple && mirrorTuple && splashTuple) {
     somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
     somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
     somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
@@ -765,12 +772,14 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     digitShapesChanged |= checkAndSaveInt(&colorTheme, colorThemeTuple->value->int32, CONFIG_KEY_COLORTHEME);
     digitShapesChanged |= checkAndSaveInt(&mirror, mirrorTuple->value->int32, CONFIG_KEY_MIRROR);
 
+    checkAndSaveInt(&splash, splashTuple->value->int32, CONFIG_KEY_SPLASH);
+
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config:");
     APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, invert=%d, lang=%d",
             USDate, showWeekday, batteryStatus, bluetoothStatus, invertStatus, curLang);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
             stripedDigits, roundCorners, fullDigits, colorTheme);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  themeCodeText=%s, mirror=%d", themeCodeText, mirror);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "  themeCodeText=%s, mirror=%d, splash=%d", themeCodeText, mirror, splash);
 
     if (colorThemeChanged) {
       decodeThemeCode(themeCodeText);
@@ -876,6 +885,14 @@ void readConfig() {
     persist_write_int(CONFIG_KEY_MIRROR, mirror);
   }
 
+
+  if (persist_exists(CONFIG_KEY_SPLASH)) {
+    splash = persist_read_int(CONFIG_KEY_SPLASH);
+  } else {
+    splash = 1;
+    persist_write_int(CONFIG_KEY_SPLASH, splash);
+  }
+
   decodeThemeCode(themeCodeText);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Stored config :");
@@ -883,7 +900,7 @@ void readConfig() {
           USDate, showWeekday, batteryStatus, bluetoothStatus, invertStatus);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  lang=%d, stripedDigits=%d, roundCorners=%d, fullDigits=%d",
           curLang, stripedDigits, roundCorners, fullDigits);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s, mirror=%d", colorTheme, themeCodeText, mirror);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s, mirror=%d, splash=%d", colorTheme, themeCodeText, mirror, splash);
 }
 
 static void app_message_init(void) {
@@ -901,21 +918,35 @@ void initDigitCorners() {
 }
 
 void initSplash() {
-  char vers[10];
-  int len, s, i;
+  if (splash) {
+    char vers[10];
+    int len, s, i;
+    
+    snprintf(vers, sizeof(vers), "%d.%d", __pbl_app_info.process_version.major, __pbl_app_info.process_version.minor);
+    len = strlen(vers);
+    s = (8 - len)/2;
 
-  snprintf(vers, sizeof(vers), "%d.%d", __pbl_app_info.process_version.major, __pbl_app_info.process_version.minor);
-  len = strlen(vers);
-  s = (8 - len)/2;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Blockslide %s", vers);
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Blockslide %s", vers);
-
-  for (i=0; i<len; i++) {
-    if ((vers[i] >= '0') && (vers[i] <= 'Z')) {
-      startDigit[4+s+i] = vers[i] - '0';
-    } else if (vers[i] == '.') {
-      startDigit[4+s+i] = DOT;
+    for (i=0; i<len; i++) {
+      if ((vers[i] >= '0') && (vers[i] <= 'Z')) {
+        startDigit[4+s+i] = vers[i] - '0';
+      } else if (vers[i] == '.') {
+        startDigit[4+s+i] = DOT;
+      }
     }
+  } else {
+    int i;
+    splashEnded = true;
+    time_t t = time(NULL);
+    struct tm *tt = localtime(&t);
+    doanim = false;
+    handle_tick(tt, 0);
+    for (i=0; i<NUMSLOTS; i++) {
+      startDigit[i] = slot[i].curDigit;
+    }
+    handle_tick(tt, 0);
+    doanim = true;
   }
 }
 
@@ -927,9 +958,9 @@ void handle_init() {
 
   readConfig();
   swapDigitShapes();
-  app_message_init();
-
   initSplash();
+
+  app_message_init();
 
   window = window_create();
   if (invertStatus) {
