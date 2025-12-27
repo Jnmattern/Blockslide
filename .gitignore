@@ -1,0 +1,10 @@
+# Pebble Build Artifacts
+build/
+*.pbw
+*.bin
+
+# macOS junk
+.DS_Store
+
+# User-specific config
+pebble_config.json
