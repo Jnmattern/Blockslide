@@ -208,75 +208,67 @@ void updateMainLayer(Layer *layer, GContext *ctx) {
 }
 
 void updateSlot(Layer *layer, GContext *ctx) {
-  int t, tx1, tx2, ty1, ty2, ox, oy, numcol;
-  int cornerRadius = 0;
-  uint8_t curCorner, prevCorner;
-  GCornerMask cornerMask;
-  digitSlot *slot;
-  static unsigned int animMiddle = ANIMATION_NORMALIZED_MAX / 2;
+  digitSlot *slot = findSlot(layer);
+  if (!slot) return;
 
-  slot = findSlot(layer);
-  curCorner=slot->curDigit;
-  prevCorner=slot->prevDigit;
+  // Cache commonly used values to avoid repeated pointer dereferencing
+  const int tileW = slot->tileWidth;
+  const int tileH = slot->tileHeight;
+  const int cornerR = slot->cornerRadius;
+  const uint32_t normTime = slot->normTime;
+  const int curDigit = slot->curDigit;
+  const int prevDigit = slot->prevDigit;
+  
+  // Pre-calculate normalized progress once
+  bool isFinished = (normTime == ANIMATION_NORMALIZED_MAX);
+  unsigned int animMiddle = ANIMATION_NORMALIZED_MAX / 2;
 
-  for (t=0; t<13; t++) {
-    cornerMask = GCornerNone;
-    cornerRadius = 0;
-    if (digits[slot->curDigit][t][0] != digits[slot->prevDigit][t][0]
-        || digits[slot->curDigit][t][1] != digits[slot->prevDigit][t][1]) {
-      if (slot->normTime == ANIMATION_NORMALIZED_MAX) {
-        ox = digits[slot->curDigit][t][0]*slot->tileWidth;
-        oy = digits[slot->curDigit][t][1]*slot->tileHeight;
-      } else {
-        tx1 = digits[slot->prevDigit][t][0]*slot->tileWidth;
-        tx2 = digits[slot->curDigit][t][0]*slot->tileWidth;
-        ty1 = digits[slot->prevDigit][t][1]*slot->tileHeight;
-        ty2 = digits[slot->curDigit][t][1]*slot->tileHeight;
-
-        ox = slot->normTime * (tx2-tx1) / ANIMATION_NORMALIZED_MAX + tx1;
-        oy = slot->normTime * (ty2-ty1) / ANIMATION_NORMALIZED_MAX + ty1;
-      }
+  for (int t = 0; t < 13; t++) {
+    int ox, oy;
+    
+    // 1. Efficient Position Calculation
+    if (isFinished || (digits[curDigit][t][0] == digits[prevDigit][t][0] && 
+                       digits[curDigit][t][1] == digits[prevDigit][t][1])) {
+      ox = digits[curDigit][t][0] * tileW;
+      oy = digits[curDigit][t][1] * tileH;
     } else {
-      ox = digits[slot->curDigit][t][0]*slot->tileWidth;
-      oy = digits[slot->curDigit][t][1]*slot->tileHeight;
+      int tx1 = digits[prevDigit][t][0] * tileW;
+      int tx2 = digits[curDigit][t][0] * tileW;
+      int ty1 = digits[prevDigit][t][1] * tileH;
+      int ty2 = digits[curDigit][t][1] * tileH;
+
+      ox = (int)(normTime * (tx2 - tx1) / ANIMATION_NORMALIZED_MAX) + tx1;
+      oy = (int)(normTime * (ty2 - ty1) / ANIMATION_NORMALIZED_MAX) + ty1;
     }
 
+    // 2. Optimized Corner Logic
+    GCornerMask cornerMask = GCornerNone;
+    int currentR = 0;
+    
     if (roundCorners) {
-      if (digitCorners[curCorner][t] != digitCorners[prevCorner][t]) {
-        // Corner become smaller till half, and bigger afterward;
-        if (slot->normTime > ANIMATION_NORMALIZED_MAX) {
-          cornerRadius = 0;
-          cornerMask = digitCorners[prevCorner][t]; //point to corner of prv digit
-        } else {
-          cornerRadius = 2*slot->cornerRadius * slot->normTime / ANIMATION_NORMALIZED_MAX - slot->cornerRadius;
-          if (cornerRadius < 0) {
-            cornerRadius = -cornerRadius;
-          }
-          if (slot->normTime < animMiddle) {
-            cornerMask = digitCorners[prevCorner][t];
-          } else {
-            cornerMask = digitCorners[curCorner][t];
-          }
-        }
+      if (digitCorners[curDigit][t] == digitCorners[prevDigit][t]) {
+        currentR = cornerR;
+        cornerMask = digitCorners[curDigit][t];
       } else {
-        cornerRadius = slot->cornerRadius;
-        cornerMask = digitCorners[curCorner][t];
+        // Animation corner scaling
+        int rawR = (2 * cornerR * (int)normTime / (int)ANIMATION_NORMALIZED_MAX) - cornerR;
+        currentR = (rawR < 0) ? -rawR : rawR;
+        cornerMask = (normTime < animMiddle) ? digitCorners[prevDigit][t] : digitCorners[curDigit][t];
       }
     }
+
+    // 3. Fast Color Setting
 #ifdef PBL_COLOR
-    numcol = digits[slot->curDigit][t][1] % 5;
-    if (mirror && (slot->num == 2 || slot->num == 3)) {
-      numcol = 4 - numcol;
-    }
+    int numcol = digits[curDigit][t][1] % 5;
+    if (mirror && (slot->num == 2 || slot->num == 3)) numcol = 4 - numcol;
     graphics_context_set_fill_color(ctx, color[colorTheme][numcol]);
 #else
-    if (invertStatus) {
-      graphics_context_set_fill_color(ctx, GColorBlack);
-    } else {
-      graphics_context_set_fill_color(ctx, GColorWhite);
-    }
+    graphics_context_set_fill_color(ctx, invertStatus ? GColorBlack : GColorWhite);
 #endif
-    graphics_fill_rect(ctx, GRect(ox, oy, slot->tileWidth, slot->tileHeight-stripedDigits), cornerRadius, cornerMask);
+
+    // 4. Draw with stripe-awareness
+    // Subtracting stripedDigits here prevents drawing pixels that will just be covered/cleared
+    graphics_fill_rect(ctx, GRect(ox, oy, tileW, tileH - stripedDigits), currentR, cornerMask);
   }
 }
 
@@ -316,17 +308,33 @@ void redrawAllSlots() {
 }
 
 void destroyAnim(Animation *animation) {
+  /*
   if (anim != NULL) {
     animation_destroy(anim);
   }
+    */
   anim = NULL;
 }
 
 void createAnim() {
+  if (anim != NULL) {
+    animation_unschedule(anim);
+    anim = NULL;
+  }
+
   anim = animation_create();
-  animation_set_delay(anim, 0);
-  animation_set_duration(anim, DIGIT_CHANGE_ANIM_DURATION);
-  animation_set_implementation(anim, &animImpl);
+  if (anim) {
+    animation_set_delay(anim, 0);
+    animation_set_duration(anim, DIGIT_CHANGE_ANIM_DURATION);
+    animation_set_implementation(anim, &animImpl);
+    
+    // Explicitly casting the handler to prevent the 'incompatible pointer' error
+    AnimationHandlers handlers = {
+      .stopped = (AnimationStoppedHandler)destroyAnim
+    };
+    
+    animation_set_handlers(anim, handlers, NULL);
+  }
 }
 
 #ifdef PBL_PLATFORM_APLITE
@@ -455,19 +463,25 @@ void do_update() {
 
 void handle_timer(void *data) {
   timer=NULL;
+  animRunning = false; // Release the lock
   do_update();
+}
+
+void safe_register_timer(int delay) {
+  //If a timer exists, cancel it before making a new one
+  if (timer != NULL) {
+    app_timer_cancel(timer);
+  }
+  timer = app_timer_register(delay, handle_timer, NULL);
 }
 
 void handle_tap(AccelAxisType axis, int32_t direction) {
   static BatteryChargeState chargeState;
   int i, s;
 
+  // Added a check: Don't trigger if already showing battery/BT info
   if (batteryStatus && splashEnded && !animRunning) {
-    if (animation_is_scheduled(anim)) {
-      animation_unschedule(anim);
-    }
-
-    animRunning = true;
+    animRunning = true; 
 
     chargeState = battery_state_service_peek();
     s = chargeState.charge_percent;
@@ -480,15 +494,15 @@ void handle_tap(AccelAxisType axis, int32_t direction) {
     slot[5].curDigit = 'A' - '0';
     slot[6].curDigit = 'T' - '0';
     slot[7].curDigit = SPACE_D;
-    slot[8].curDigit = (s==100)?1:SPACE_D;
-    slot[9].curDigit = (s<100)?s/10:0;
-    slot[10].curDigit = (s<100)?s/100:0;
-    slot[11].curDigit = PERCENT;
+    // Correct Battery Logic
+    slot[8].curDigit = (s == 100) ? 1 : SPACE_D;         // Show '1' only for 100
+    slot[9].curDigit = (s >= 10) ? (s / 10) % 10 : SPACE_D; // Tens place (Space if < 10)
+    slot[10].curDigit = s % 10;                          // Units place (The '6' in 6%)
+    slot[11].curDigit = PERCENT;                         // The '%' symbol
 
     createAnim();
     animation_schedule(anim);
-    if (timer==NULL)
-      timer= app_timer_register(BATTERYDELAY, handle_timer, NULL);
+    safe_register_timer(BATTERYDELAY);
   }
 }
 
@@ -733,70 +747,68 @@ void in_dropped_handler(AppMessageResult reason, void *context) {
 
 void in_received_handler(DictionaryIterator *received, void *context) {
   bool somethingChanged = false;
-  bool digitShapesHaveToBeSwapped = false;
-  bool colorThemeChanged = false;
+  bool digitShapesChanged = false;
 
+  // 1. Time & Date Settings
   Tuple *dateorder = dict_find(received, CONFIG_KEY_DATEORDER);
+  if(dateorder) somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
+
   Tuple *weekday = dict_find(received, CONFIG_KEY_WEEKDAY);
-  Tuple *battery = dict_find(received, CONFIG_KEY_BATTERY);
-  Tuple *bluetooth = dict_find(received, CONFIG_KEY_BLUETOOTH);
-  Tuple *invert = dict_find(received, CONFIG_KEY_INVERT);
+  if(weekday) somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
+
   Tuple *lang = dict_find(received, CONFIG_KEY_LANG);
-  Tuple *stripes = dict_find(received, CONFIG_KEY_STRIPES);
-  Tuple *corners = dict_find(received, CONFIG_KEY_ROUNDCORNERS);
-  Tuple *digits = dict_find(received, CONFIG_KEY_FULLDIGITS);
-  Tuple *colorThemeTuple = dict_find(received, CONFIG_KEY_COLORTHEME);
+  if(lang) somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
+
+  // 2. Status Alerts
+  Tuple *battery = dict_find(received, CONFIG_KEY_BATTERY);
+  if(battery) checkAndSaveInt(&batteryStatus, battery->value->int32, CONFIG_KEY_BATTERY);
+
+  Tuple *bluetooth = dict_find(received, CONFIG_KEY_BLUETOOTH);
+  if(bluetooth) checkAndSaveInt(&bluetoothStatus, bluetooth->value->int32, CONFIG_KEY_BLUETOOTH);
+
+  // 3. Visuals & Themes
+  Tuple *invert = dict_find(received, CONFIG_KEY_INVERT);
+  if(invert) digitShapesChanged |= checkAndSaveInt(&invertStatus, invert->value->int32, CONFIG_KEY_INVERT);
+
   Tuple *themeCodeTuple = dict_find(received, CONFIG_KEY_THEMECODE);
+  if(themeCodeTuple) {
+      if(checkAndSaveString(themeCodeText, themeCodeTuple->value->cstring, CONFIG_KEY_THEMECODE)) {
+          decodeThemeCode(themeCodeText);
+          digitShapesChanged = true;
+      }
+  }
+
+  Tuple *colorThemeTuple = dict_find(received, CONFIG_KEY_COLORTHEME);
+  if(colorThemeTuple) digitShapesChanged |= checkAndSaveInt(&colorTheme, colorThemeTuple->value->int32, CONFIG_KEY_COLORTHEME);
+
+  // 4. Geometry & Style
+  Tuple *stripes = dict_find(received, CONFIG_KEY_STRIPES);
+  if(stripes) digitShapesChanged |= checkAndSaveInt(&stripedDigits, stripes->value->int32, CONFIG_KEY_STRIPES);
+
+  Tuple *corners = dict_find(received, CONFIG_KEY_ROUNDCORNERS);
+  if(corners) digitShapesChanged |= checkAndSaveInt(&roundCorners, corners->value->int32, CONFIG_KEY_ROUNDCORNERS);
+
+  Tuple *digits = dict_find(received, CONFIG_KEY_FULLDIGITS);
+  if(digits) {
+      if(checkAndSaveInt(&fullDigits, digits->value->int32, CONFIG_KEY_FULLDIGITS)) {
+          swapDigitShapes();
+          digitShapesChanged = true;
+      }
+  }
+
   Tuple *mirrorTuple = dict_find(received, CONFIG_KEY_MIRROR);
+  if(mirrorTuple) digitShapesChanged |= checkAndSaveInt(&mirror, mirrorTuple->value->int32, CONFIG_KEY_MIRROR);
+
   Tuple *splashTuple = dict_find(received, CONFIG_KEY_SPLASH);
+  if(splashTuple) checkAndSaveInt(&splash, splashTuple->value->int32, CONFIG_KEY_SPLASH);
 
-  if (dateorder && weekday && battery && bluetooth && invert && lang && stripes && corners && digits && colorThemeTuple && themeCodeTuple && mirrorTuple && splashTuple) {
-    somethingChanged |= checkAndSaveInt(&USDate, dateorder->value->int32, CONFIG_KEY_DATEORDER);
-    somethingChanged |= checkAndSaveInt(&showWeekday, weekday->value->int32, CONFIG_KEY_WEEKDAY);
-    somethingChanged |= checkAndSaveInt(&curLang, lang->value->int32, CONFIG_KEY_LANG);
+  // Execution
+  if (somethingChanged) {
+    applyConfig();
+  }
 
-    checkAndSaveInt(&batteryStatus, battery->value->int32, CONFIG_KEY_BATTERY);
-    checkAndSaveInt(&bluetoothStatus, bluetooth->value->int32, CONFIG_KEY_BLUETOOTH);
-
-    digitShapesChanged = false;
-    digitShapesChanged |= checkAndSaveInt(&invertStatus, invert->value->int32, CONFIG_KEY_INVERT);
-
-    colorThemeChanged = checkAndSaveString(themeCodeText, themeCodeTuple->value->cstring, CONFIG_KEY_THEMECODE);
-    digitShapesChanged |= colorThemeChanged;
-
-    digitShapesChanged |= checkAndSaveInt(&stripedDigits, stripes->value->int32, CONFIG_KEY_STRIPES);
-    digitShapesChanged |= checkAndSaveInt(&roundCorners, corners->value->int32, CONFIG_KEY_ROUNDCORNERS);
-
-    digitShapesHaveToBeSwapped = checkAndSaveInt(&fullDigits, digits->value->int32, CONFIG_KEY_FULLDIGITS);
-    digitShapesChanged |= digitShapesHaveToBeSwapped;
-    digitShapesChanged |= checkAndSaveInt(&colorTheme, colorThemeTuple->value->int32, CONFIG_KEY_COLORTHEME);
-    digitShapesChanged |= checkAndSaveInt(&mirror, mirrorTuple->value->int32, CONFIG_KEY_MIRROR);
-
-    checkAndSaveInt(&splash, splashTuple->value->int32, CONFIG_KEY_SPLASH);
-
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config:");
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  dateorder=%d, weekday=%d, battery=%d, BT=%d, invert=%d, lang=%d",
-            USDate, showWeekday, batteryStatus, bluetoothStatus, invertStatus, curLang);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  stripes=%d, corners=%d, digits=%d, colorTheme=%d",
-            stripedDigits, roundCorners, fullDigits, colorTheme);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "  themeCodeText=%s, mirror=%d, splash=%d", themeCodeText, mirror, splash);
-
-    if (colorThemeChanged) {
-      decodeThemeCode(themeCodeText);
-    }
-
-    if (digitShapesHaveToBeSwapped) {
-      swapDigitShapes();
-    }
-
-    if (somethingChanged) {
-      applyConfig();
-    }
-
-    if (digitShapesChanged) {
-      digitShapesChanged = false;
-      redrawAllSlots();
-    }
+  if (digitShapesChanged) {
+    redrawAllSlots();
   }
 }
 
@@ -906,7 +918,7 @@ void readConfig() {
 static void app_message_init(void) {
   app_message_register_inbox_received(in_received_handler);
   app_message_register_inbox_dropped(in_dropped_handler);
-  app_message_open(255, 255);
+  app_message_open(512, 512);
 }
 
 void initDigitCorners() {
@@ -1002,21 +1014,38 @@ void handle_init() {
 
 void handle_deinit() {
   int i;
-  if (timer != NULL) {
-    app_timer_cancel(timer);
-    timer=NULL;
+  
+  // 1. Safety: Stop any running animations immediately
+  if (anim != NULL) {
+    animation_unschedule(anim);
+    anim = NULL;
   }
 
+  // 2. Cancel the return-to-time timer
+  if (timer != NULL) {
+    app_timer_cancel(timer);
+    timer = NULL;
+  }
+
+  // 3. Unsubscribe from all services
   bluetooth_connection_service_unsubscribe();
   accel_tap_service_unsubscribe();
   tick_timer_service_unsubscribe();
   
-  for (i=0; i<NUMSLOTS; i++) {
+  // 4. Destroy layers from the bottom up
+  for (i = 0; i < NUMSLOTS; i++) {
     deinitSlot(i);
   }
   
-  layer_destroy(mainLayer);
-  window_destroy(window);
+  if (mainLayer) {
+    layer_destroy(mainLayer);
+    mainLayer = NULL;
+  }
+
+  if (window) {
+    window_destroy(window);
+    window = NULL;
+  }
 }
 
 int main(void) {
