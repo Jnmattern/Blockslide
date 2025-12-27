@@ -494,10 +494,11 @@ void handle_tap(AccelAxisType axis, int32_t direction) {
     slot[5].curDigit = 'A' - '0';
     slot[6].curDigit = 'T' - '0';
     slot[7].curDigit = SPACE_D;
-    slot[8].curDigit = (s == 100) ? 1 : SPACE_D;        // Hundreds place (only '1' if 100)
-    slot[9].curDigit = (s == 100) ? 0 : (s >= 10 ? s / 10 : SPACE_D); // Tens place
-    slot[10].curDigit = s % 10;                         // Units place (ALWAYS show this)
-    slot[11].curDigit = PERCENT;                        // '%' symbol
+    // Correct Battery Logic
+    slot[8].curDigit = (s == 100) ? 1 : SPACE_D;         // Show '1' only for 100
+    slot[9].curDigit = (s >= 10) ? (s / 10) % 10 : SPACE_D; // Tens place (Space if < 10)
+    slot[10].curDigit = s % 10;                          // Units place (The '6' in 6%)
+    slot[11].curDigit = PERCENT;                         // The '%' symbol
 
     createAnim();
     animation_schedule(anim);
