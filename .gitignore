@@ -2,6 +2,7 @@
 build/
 *.pbw
 *.bin
+.lock-waf_darwin_build
 
 # macOS junk
 .DS_Store
