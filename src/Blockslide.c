@@ -59,6 +59,21 @@ enum {
 #define CX 90
 #define CY 90
 
+#elif defined(PBL_PLATFORM_EMERY)
+
+#define HSPACE 11
+#define DHSPACE 5
+#define VSPACE 10
+#define TILEW 30
+#define TILEH 17
+#define DTILEW 7
+#define DTILEH 5
+
+#define SCREENW 200
+#define SCREENH 228
+#define CX 100
+#define CY 114
+
 #else
 
 #define HSPACE 8
