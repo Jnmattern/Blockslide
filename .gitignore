@@ -9,3 +9,5 @@ build/
 
 # User-specific config
 pebble_config.json
+
+node_modules/
