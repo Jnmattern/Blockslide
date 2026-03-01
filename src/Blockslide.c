@@ -44,7 +44,22 @@ enum {
 #define STARTDELAY 700
 #define BATTERYDELAY 5000
 
-#if defined(PBL_ROUND)
+#if defined(PBL_PLATFORM_GABBRO)
+
+#define HSPACE 9
+#define DHSPACE 6
+#define VSPACE 9
+#define TILEW 27
+#define TILEH 16
+#define DTILEW 6
+#define DTILEH 4
+
+#define SCREENW 260
+#define SCREENH 260
+#define CX 130
+#define CY 130
+
+#elif defined(PBL_ROUND)
 
 #define HSPACE 6
 #define DHSPACE 4
