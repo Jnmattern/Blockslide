@@ -37,7 +37,8 @@ enum {
   CONFIG_KEY_THEMECODE = 21,
   CONFIG_KEY_INVERT = 22,
   CONFIG_KEY_MIRROR = 23,
-  CONFIG_KEY_SPLASH = 24
+  CONFIG_KEY_SPLASH = 24,
+  CONFIG_KEY_DATETOP = 25
 };
 
 #define DIGIT_CHANGE_ANIM_DURATION 800
@@ -135,6 +136,7 @@ int colorTheme = 1;
 static char themeCodeText[20] = "ffffffffffc0";
 int mirror = 0;
 int splash = 1;
+int dateOnTop = 0;
 
 bool digitShapesChanged = false;
 
@@ -186,6 +188,7 @@ GRect slotFrame(int i) {
   int w = slot[i].tileWidth*3;
   int h = slot[i].tileHeight*5;
   static int offsetY = (SCREENH-2*(VSPACE+5*TILEH)-5*DTILEH)/2;
+  int hourShiftY = dateOnTop ? 28 : 0;
 
   if (i<4) {
     // Hour slot -> big digits
@@ -196,9 +199,9 @@ GRect slotFrame(int i) {
     }
 
     if (i<2) {
-      y =  offsetY;
+      y = hourShiftY + offsetY;
     } else {
-      y = offsetY + VSPACE + h;
+      y = hourShiftY + offsetY + VSPACE + h;
     }
   } else {
     // Date slot -> small digits
@@ -210,10 +213,22 @@ GRect slotFrame(int i) {
     } else {
       x = (SCREENW-(14+8*w))/2 + (i-4)*2 + (i-4)*w;
     }
-    y = offsetY + VSPACE + DHSPACE + 10*TILEH;
+    if (dateOnTop) {
+      y = 2;
+    } else {
+      y = offsetY + VSPACE + DHSPACE + 10*TILEH;
+    }
   }
 
   return GRect(x, y, w, h);
+}
+
+void relayoutSlots() {
+  int i;
+
+  for (i=0; i<NUMSLOTS; i++) {
+    layer_set_frame(slot[i].layer, slotFrame(i));
+  }
 }
 
 digitSlot *findSlot(Layer *layer) {
@@ -839,6 +854,14 @@ void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *splashTuple = dict_find(received, CONFIG_KEY_SPLASH);
   if(splashTuple) checkAndSaveInt(&splash, splashTuple->value->int32, CONFIG_KEY_SPLASH);
 
+  Tuple *dateTopTuple = dict_find(received, CONFIG_KEY_DATETOP);
+  if(dateTopTuple) {
+      if(checkAndSaveInt(&dateOnTop, dateTopTuple->value->int32, CONFIG_KEY_DATETOP)) {
+          relayoutSlots();
+          digitShapesChanged = true;
+      }
+  }
+
   // Execution
   if (somethingChanged) {
     applyConfig();
@@ -942,6 +965,13 @@ void readConfig() {
     persist_write_int(CONFIG_KEY_SPLASH, splash);
   }
 
+  if (persist_exists(CONFIG_KEY_DATETOP)) {
+    dateOnTop = persist_read_int(CONFIG_KEY_DATETOP);
+  } else {
+    dateOnTop = 0;
+    persist_write_int(CONFIG_KEY_DATETOP, dateOnTop);
+  }
+
   decodeThemeCode(themeCodeText);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Stored config :");
@@ -949,7 +979,7 @@ void readConfig() {
           USDate, showWeekday, batteryStatus, bluetoothStatus, invertStatus);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  lang=%d, stripedDigits=%d, roundCorners=%d, fullDigits=%d",
           curLang, stripedDigits, roundCorners, fullDigits);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s, mirror=%d, splash=%d", colorTheme, themeCodeText, mirror, splash);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s, mirror=%d, splash=%d, dateOnTop=%d", colorTheme, themeCodeText, mirror, splash, dateOnTop);
 }
 
 static void app_message_init(void) {
