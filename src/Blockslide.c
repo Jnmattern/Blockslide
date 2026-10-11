@@ -38,7 +38,8 @@ enum {
   CONFIG_KEY_INVERT = 22,
   CONFIG_KEY_MIRROR = 23,
   CONFIG_KEY_SPLASH = 24,
-  CONFIG_KEY_DATETOP = 25
+  CONFIG_KEY_DATETOP = 25,
+  CONFIG_KEY_YEARFIRST = 26
 };
 
 #define DIGIT_CHANGE_ANIM_DURATION 800
@@ -137,6 +138,7 @@ static char themeCodeText[20] = "ffffffffffc0";
 int mirror = 0;
 int splash = 1;
 int dateOnTop = 0;
+int yearFirst = 0;
 
 bool digitShapesChanged = false;
 
@@ -432,9 +434,8 @@ void handle_tick(struct tm *now, TimeUnits units_changed) {
 
     if (showWeekday) {
       wd = now->tm_wday;
-    } else {
-      Y = now->tm_year%100;
     }
+    Y = now->tm_year%100;
 
     if (!clock_is_24h_style()) {
       h = h%12;
@@ -457,7 +458,15 @@ void handle_tick(struct tm *now, TimeUnits units_changed) {
 
 
     // Date slots
-    if (showWeekday && USDate) {
+    // Show day of week wins; year first applies only when it is off
+    if (yearFirst && !showWeekday) {
+      slot[4].curDigit = Y/10;
+      slot[5].curDigit = Y%10;
+      slot[7].curDigit = M/10;
+      slot[8].curDigit = M%10;
+      slot[10].curDigit = D/10;
+      slot[11].curDigit = D%10;
+    } else if (showWeekday && USDate) {
       slot[4].curDigit = weekDay[curLang][wd][0] - '0';
       slot[5].curDigit = weekDay[curLang][wd][1] - '0';
       slot[7].curDigit = M/10;
@@ -862,6 +871,9 @@ void in_received_handler(DictionaryIterator *received, void *context) {
       }
   }
 
+  Tuple *yearFirstTuple = dict_find(received, CONFIG_KEY_YEARFIRST);
+  if(yearFirstTuple) somethingChanged |= checkAndSaveInt(&yearFirst, yearFirstTuple->value->int32, CONFIG_KEY_YEARFIRST);
+
   // Execution
   if (somethingChanged) {
     applyConfig();
@@ -972,6 +984,13 @@ void readConfig() {
     persist_write_int(CONFIG_KEY_DATETOP, dateOnTop);
   }
 
+  if (persist_exists(CONFIG_KEY_YEARFIRST)) {
+    yearFirst = persist_read_int(CONFIG_KEY_YEARFIRST);
+  } else {
+    yearFirst = 0;
+    persist_write_int(CONFIG_KEY_YEARFIRST, yearFirst);
+  }
+
   decodeThemeCode(themeCodeText);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Stored config :");
@@ -979,7 +998,7 @@ void readConfig() {
           USDate, showWeekday, batteryStatus, bluetoothStatus, invertStatus);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "  lang=%d, stripedDigits=%d, roundCorners=%d, fullDigits=%d",
           curLang, stripedDigits, roundCorners, fullDigits);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s, mirror=%d, splash=%d, dateOnTop=%d", colorTheme, themeCodeText, mirror, splash, dateOnTop);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "  colorTheme=%d, themecode=%s, mirror=%d, splash=%d, dateOnTop=%d, yearFirst=%d", colorTheme, themeCodeText, mirror, splash, dateOnTop, yearFirst);
 }
 
 static void app_message_init(void) {

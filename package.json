@@ -53,7 +53,8 @@
       "invert": 22,
       "mirror": 23,
       "splash": 24,
-      "datetop": 25
+      "datetop": 25,
+      "yearfirst": 26
     }
   }
 }

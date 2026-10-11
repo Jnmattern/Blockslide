@@ -12,6 +12,7 @@ var invert;
 var mirror;
 var splash;
 var datetop;
+var yearfirst;
 
 function readConfig() {
   dateorder = localStorage.getItem("dateorder");
@@ -83,6 +84,11 @@ function readConfig() {
   if (!datetop) {
     datetop = 0;
   }
+
+  yearfirst = localStorage.getItem("yearfirst");
+  if (!yearfirst) {
+    yearfirst = 0;
+  }
 }
 
 function logVariables(msg) {
@@ -101,6 +107,7 @@ function logVariables(msg) {
   console.log("	mirror: " + mirror);
   console.log("	splash: " + splash);
   console.log("	datetop: " + datetop);
+  console.log("	yearfirst: " + yearfirst);
 }
 
 function isWatchColorCapable() {
@@ -140,6 +147,7 @@ Pebble.addEventListener("ready", function() {
   msg += ',"mirror":'+mirror;
   msg += ',"splash":'+splash;
   msg += ',"datetop":'+datetop;
+  msg += ',"yearfirst":'+yearfirst;
   msg += '}';
   console.log("Sending message to watch :");
   console.log(" " + msg);
@@ -148,7 +156,7 @@ Pebble.addEventListener("ready", function() {
 
 Pebble.addEventListener("showConfiguration", function(e) {
 	logVariables("showConfiguration Event");
-  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide_3.20.html?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&invert=" + invert + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&themecode=" + themecode + "&colorCapable=" + isWatchColorCapable() + "&mirror=" + mirror + "&splash=" + splash + "&datetop=" + datetop;
+  var url = "http://www.famillemattern.com/jnm/pebble/Blockslide/Blockslide_3.20.html?dateorder=" + dateorder + "&weekday=" + weekday + "&battery=" + battery + "&bluetooth=" + bluetooth + "&invert=" + invert + "&lang=" + lang + "&stripes=" + stripes + "&roundcorners=" + roundcorners + "&fulldigits=" + fulldigits + "&colortheme=" + colortheme + "&themecode=" + themecode + "&colorCapable=" + isWatchColorCapable() + "&mirror=" + mirror + "&splash=" + splash + "&datetop=" + datetop + "&yearfirst=" + yearfirst;
   console.log(url);
 	Pebble.openURL(url);
 });
@@ -202,6 +210,9 @@ Pebble.addEventListener("webviewclosed", function(e) {
 
   datetop = configuration["datetop"];
 	localStorage.setItem("datetop", datetop);
+
+  yearfirst = configuration["yearfirst"];
+	localStorage.setItem("yearfirst", yearfirst);
 });
 
 

@@ -103,6 +103,24 @@
         </div>
   </div>
   <div class="ui-block-b">
+    <div id="yearfirst" data-role="fieldcontain" class="ui-bar">
+			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+        <legend>Year first (YY-MM-DD)</legend>
+<script>
+  if (typeof (args.yearfirst) == "undefined") {
+    args.yearfirst = 0;
+  }
+
+  s = [ "", "" ];
+  s[args.yearfirst] = " checked";
+
+  document.writeln('<input id="yearfirst1" name="yearfirst" value="0" data-theme="" type="radio"' + s[0] + '><label for="yearfirst1">Off</label>');
+	document.writeln('<input id="yearfirst2" name="yearfirst" value="1" data-theme="" type="radio"' + s[1] + '><label for="yearfirst2">On</label>');
+</script>
+			</fieldset>
+		</div>
+  </div>
+  <div class="ui-block-a">
     <div id="battery" data-role="fieldcontain" class="ui-bar">
 			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Tap to show battery</legend>
@@ -120,7 +138,7 @@
 			</fieldset>
 		</div>
   </div>
-  <div class="ui-block-a">
+  <div class="ui-block-b">
     <div id="bluetooth" data-role="fieldcontain" class="ui-bar">
       <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Vibrate on BT disconnect</legend>
@@ -138,7 +156,7 @@
         </fieldset>
       </div>
   </div>
-    <div class="ui-block-b">
+    <div class="ui-block-a">
     <div id="mirror" data-role="fieldcontain" class="ui-bar">
 			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Mirror Colors for bottom digits</legend>
@@ -156,7 +174,7 @@
 			</fieldset>
 		</div>
   </div>
-    <div class="ui-block-a">
+    <div class="ui-block-b">
     <div id="splash" data-role="fieldcontain" class="ui-bar">
 			<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
         <legend>Splash Animation</legend>
@@ -180,7 +198,7 @@
     showDiv = ' style="display: none;"';
   }
 
-  document.writeln('<div class="ui-block-b"' + showDiv + '>');
+  document.writeln('<div class="ui-block-a"' + showDiv + '>');
  </script>
     <div id="invert" data-role="fieldcontain" class="ui-bar">
       <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
@@ -537,7 +555,8 @@
       'themecode': $("#themecode").val(),
       'mirror': parseInt($("input[name=mirror]:checked").val(), 10),
       'splash': parseInt($("input[name=splash]:checked").val(), 10),
-      'datetop': parseInt($("input[name=datetop]:checked").val(), 10)
+      'datetop': parseInt($("input[name=datetop]:checked").val(), 10),
+      'yearfirst': parseInt($("input[name=yearfirst]:checked").val(), 10)
     }
     return options;
   }
