@@ -113,7 +113,9 @@ function logVariables(msg) {
 function isWatchColorCapable() {
   if (typeof Pebble.getActiveWatchInfo === "function") {
     try {
-      if (Pebble.getActiveWatchInfo().platform != 'aplite') {
+      // B&W displays per the hardware information page: aplite, diorite, flint
+      var platform = Pebble.getActiveWatchInfo().platform;
+      if (platform != 'aplite' && platform != 'diorite' && platform != 'flint') {
         return true;
       } else {
         return false;
