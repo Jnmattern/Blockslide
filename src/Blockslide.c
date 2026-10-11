@@ -202,7 +202,14 @@ GRect slotFrame(int i) {
     }
   } else {
     // Date slot -> small digits
-    x = (SCREENW-(14+8*w))/2 + (i-4)*2 + (i-4)*w;
+    if (SCREENW == 144) {
+      // Pairs 2 px apart inside, spread across the time digits.
+      // Slots 6 and 9 are blank spacers.
+      static const int pairX[8] = {2, 19, 36, 56, 73, 90, 110, 127};
+      x = pairX[i-4];
+    } else {
+      x = (SCREENW-(14+8*w))/2 + (i-4)*2 + (i-4)*w;
+    }
     y = offsetY + VSPACE + DHSPACE + 10*TILEH;
   }
 
