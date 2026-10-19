@@ -45,6 +45,7 @@ enum {
 #define DIGIT_CHANGE_ANIM_DURATION 800
 #define STARTDELAY 700
 #define BATTERYDELAY 5000
+#define HOUR_SHIFT_TOP 28
 
 #if defined(PBL_PLATFORM_GABBRO)
 
@@ -60,6 +61,9 @@ enum {
 #define SCREENH 260
 #define CX 130
 #define CY 130
+#define DATE_TOP_Y \
+  ((SCREENH - 2 * (VSPACE + 5 * TILEH) - 5 * DTILEH) / 2 \
+   + HOUR_SHIFT_TOP - 5 * DTILEH - DHSPACE)
 
 #elif defined(PBL_ROUND)
 
@@ -75,6 +79,9 @@ enum {
 #define SCREENH 180
 #define CX 90
 #define CY 90
+#define DATE_TOP_Y \
+  ((SCREENH - 2 * (VSPACE + 5 * TILEH) - 5 * DTILEH) / 2 \
+   + HOUR_SHIFT_TOP - 5 * DTILEH - DHSPACE)
 
 #elif defined(PBL_PLATFORM_EMERY)
 
@@ -90,6 +97,7 @@ enum {
 #define SCREENH 228
 #define CX 100
 #define CY 114
+#define DATE_TOP_Y 2
 
 #else
 
@@ -105,6 +113,7 @@ enum {
 #define SCREENH 168
 #define CX 72
 #define CY 84
+#define DATE_TOP_Y 2
 
 #endif
 
@@ -190,7 +199,7 @@ GRect slotFrame(int i) {
   int w = slot[i].tileWidth*3;
   int h = slot[i].tileHeight*5;
   static int offsetY = (SCREENH-2*(VSPACE+5*TILEH)-5*DTILEH)/2;
-  int hourShiftY = dateOnTop ? 28 : 0;
+  int hourShiftY = dateOnTop ? HOUR_SHIFT_TOP : 0;
 
   if (i<4) {
     // Hour slot -> big digits
@@ -216,7 +225,7 @@ GRect slotFrame(int i) {
       x = (SCREENW-(14+8*w))/2 + (i-4)*2 + (i-4)*w;
     }
     if (dateOnTop) {
-      y = 2;
+      y = DATE_TOP_Y;
     } else {
       y = offsetY + VSPACE + DHSPACE + 10*TILEH;
     }
